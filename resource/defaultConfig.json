@@ -1,0 +1,12 @@
+{
+  "apiUrl":"http://0.0.0.0/api/",
+  "musicStorageUrl":"http://music.alfa.explorers.mdomain/Music/",
+  "userdataStorageUrl":"http://music.alfa.explorers.mdomain/userdata/",
+  "localMusicStoragePath":"Music/",
+  "localUserdataStoragePath":"./userdata/",
+  "databasePath":"./database.sqlite3",
+  "syncDatabaseOnStart":true,
+  "syncUserdataOnStart":true,
+  "authenticateOnStart":true,
+  "loglevel":2
+}
