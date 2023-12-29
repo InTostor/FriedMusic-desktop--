@@ -32,4 +32,6 @@ vector<Source> getPlaylistsSource(Types::StorageType where);
 Source lookupTrack(string filename);
 void assembleTrack(Track *track);
 void assembleTrack(vector<reference_wrapper<Track>> tracks);
+
+Playlist getPlaylistFromSource(Source source, bool assemble = false);
 };

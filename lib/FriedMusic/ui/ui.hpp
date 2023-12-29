@@ -1,12 +1,10 @@
-
+#pragma once
 #include <iostream>
 #include <string>
 #include "../Data.hpp"
 #include "../Client.hpp"
 #include "../SoundMaker.hpp"
 
-#ifndef ui_HPP_INCLUDED
-#define ui_HPP_INCLUDED
 
 using namespace std;
 
@@ -14,35 +12,41 @@ class SoundMaker;
 class StandartGlobalUser{
   public:
   SoundMaker *soundmaker;
-  Client client;
-   void onMediaPlayerMediaChanged(){};
-   void onMediaPlayerNothingSpecial(){};
-   void onMediaPlayerOpening(){};
-   void onMediaPlayerBuffering(){};
-   void onMediaPlayerPlaying(){};
-   void onMediaPlayerPaused(){};
-   void onMediaPlayerStopped(){};
-   void onMediaPlayerForward(){};
-   void onMediaPlayerBackward(){};
-   void onMediaPlayerEndReached(){};
-   void onMediaPlayerEncounteredError(){};
-   void onMediaPlayerTimeChanged(){};
-   void onMediaPlayerPositionChanged(){};
-   void onMediaPlayerLengthChanged(){};
-   void onMediaPlayerVout(){};
-   void onMediaPlayerScrambledChanged(){};
-   void onMediaPlayerESAdded(){};
-   void onMediaPlayerESDeleted(){};
-   void onMediaPlayerESSelected(){};
-   void onMediaPlayerCorked(){};
-   void onMediaPlayerUncorked(){};
-   void onMediaPlayerMuted(){};
-   void onMediaPlayerUnmuted(){};
-   void onMediaPlayerAudioVolume(){};
-   void onMediaPlayerAudioDevice(){};
-   void onAuthenticationTryed(){};
-   void onFilesUpdated(){};
-   void onSoundMakerPlaylistInsert(){};
+  Client *client;
+  void onMediaPlayerMediaChanged(){};
+  void onMediaPlayerNothingSpecial(){};
+  void onMediaPlayerOpening(){};
+  void onMediaPlayerBuffering(){};
+  void onMediaPlayerPlaying(){};
+  void onMediaPlayerPaused(){};
+  void onMediaPlayerStopped(){};
+  void onMediaPlayerForward(){};
+  void onMediaPlayerBackward(){};
+  void onMediaPlayerEndReached(){};
+  void onMediaPlayerEncounteredError(){};
+  void onMediaPlayerTimeChanged(){};
+  void onMediaPlayerPositionChanged(){};
+  void onMediaPlayerLengthChanged(){};
+  void onMediaPlayerVout(){};
+  void onMediaPlayerScrambledChanged(){};
+  void onMediaPlayerESAdded(){};
+  void onMediaPlayerESDeleted(){};
+  void onMediaPlayerESSelected(){};
+  void onMediaPlayerCorked(){};
+  void onMediaPlayerUncorked(){};
+  void onMediaPlayerMuted(){};
+  void onMediaPlayerUnmuted(){};
+  void onMediaPlayerAudioVolume(){};
+  void onMediaPlayerAudioDevice(){};
+
+  void onAuthenticationTryed(){};
+  void onFilesUpdated(){};
+  void onSoundMakerPlaylistInsert(){};
+
+  void setGlobals(SoundMaker *sm, Client *cl){
+   soundmaker = sm;
+   client = cl;
+  }
 };
 
 class Icons{
@@ -74,4 +78,3 @@ string const Icons::DELETE = "resource/trash-can.svg";
 string const Icons::MOREVERT = "resource/more_vert.svg";
 string const Icons::SETTINGS = "resource/settings.svg";
 
-#endif

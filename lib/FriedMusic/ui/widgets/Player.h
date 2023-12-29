@@ -21,7 +21,7 @@
 
 #include "../ui.hpp"
 
-class Player: public QWidget, StandartGlobalUser
+class Player: public QWidget, public virtual StandartGlobalUser
 {
 public:
     QHBoxLayout *horizontalLayout;
