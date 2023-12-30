@@ -9,20 +9,20 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QtCore/QVariant>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QTabWidget>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
+#include <QVariant>
+#include <QApplication>
+#include <QFormLayout>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
-QT_BEGIN_NAMESPACE
+#include "../ui.hpp"
 
-class Ui_Settings
+class Settings: public QWidget, public virtual StandartGlobalUser
 {
 public:
     QVBoxLayout *verticalLayout_5;
@@ -271,12 +271,10 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(aboutPage), QCoreApplication::translate("Settings", "About", nullptr));
     } // retranslateUi
 
+    Settings(){
+        Settings::setupUi(this);
+    }
 };
 
-namespace Ui {
-    class Settings: public Ui_Settings {};
-} // namespace Ui
-
-QT_END_NAMESPACE
 
 #endif // SETTINGS_H

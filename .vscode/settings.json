@@ -71,8 +71,10 @@
     "valarray": "cpp",
     "variant": "cpp",
     "qvariant": "cpp",
-    "qwidget": "cpp"
+    "qwidget": "cpp",
+    "qgridlayout": "cpp"
   },
   "cmake.configureOnOpen": false,
-  "C_Cpp.errorSquiggles": "enabled"
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.clang_format_fallbackStyle":"Google"
 }
