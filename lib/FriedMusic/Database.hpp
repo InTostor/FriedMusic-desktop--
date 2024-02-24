@@ -1,16 +1,29 @@
 #include <iostream>
 #include <map>
+#include <string>
 
 #include "Data.hpp"
+#include "macro.hpp"
 #include "nlohman/json.hpp"
+#include <cpr/cpr.h>
 
-using json = nlohmann::json;
 using namespace std;
 
-class Database{
-public:
+class Database {
+ public:
+  /// @brief Returns JSON answer from API server
+  /// @param sql
+  /// @return
+  nlohmann::json Database::executeRemoteQuery(string sql) {
+    sql = ReplaceInString(sql, "&", "%26");
+    string url;
+    url = getConfigValue("apiUrl") + "/selectMetadata.php";
+    cpr::Response response =
+        cpr::Post(cpr::Url{url}, cpr::Payload{{"sql", sql}});
+    if (response.status_code == 200) {
+      return nlohmann::json::parse(response.text);
+    }
 
-
-json executeRemoteQuery(string sql);
-
-};
+    return nlohmann::json::parse("");
+  }
+}

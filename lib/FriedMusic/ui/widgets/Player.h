@@ -9,280 +9,357 @@
 #ifndef PLAYERWIDGET_H
 #define PLAYERWIDGET_H
 
-#include <QVariant>
 #include <QApplication>
+#include <QAudio>
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
 #include <QVBoxLayout>
+#include <QVariant>
 #include <QWidget>
 
+#include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
 
-class Player: public QWidget, public virtual StandartGlobalUser
-{
-public:
-    QHBoxLayout *horizontalLayout;
-    QVBoxLayout *playerMainControlsLayout;
-    QLabel *infoTrack;
-    QHBoxLayout *artistInfoLayout;
-    QLabel *infoArtist;
-    QLabel *infoAlbum;
-    QLabel *infoFilename;
-    QHBoxLayout *playerMainButtons;
-    QPushButton *prevButton;
-    QPushButton *playButton;
-    QPushButton *nextButton;
-    QHBoxLayout *seekerLayout;
-    QLabel *label_2;
-    QSlider *seekerSlider;
-    QHBoxLayout *auxButtonLayout;
-    QComboBox *loopComboBox;
-    QPushButton *shuffleButton;
-    QPushButton *addToFavouriteButton;
-    QPushButton *addToPlaylistButton;
-    QVBoxLayout *volumeLayout;
-    QSlider *volumeSlider;
-    QLabel *volumeLabel;
+class Player : public virtual StandartGlobalUser, public QWidget {
+ public:
+  QHBoxLayout *horizontalLayout;
+  QVBoxLayout *playerMainControlsLayout;
+  QLabel *infoTrack;
+  QHBoxLayout *artistInfoLayout;
+  QLabel *infoArtist;
+  QLabel *infoAlbum;
+  QLabel *infoFilename;
+  QHBoxLayout *playerMainButtons;
+  QPushButton *prevButton;
+  QPushButton *playButton;
+  QPushButton *nextButton;
+  QHBoxLayout *seekerLayout;
+  QLabel *seekerLabel;
+  QSlider *seekerSlider;
+  QHBoxLayout *auxButtonLayout;
+  QComboBox *loopComboBox;
+  QPushButton *shuffleButton;
+  QPushButton *addToFavouriteButton;
+  QPushButton *addToPlaylistButton;
+  QVBoxLayout *volumeLayout;
+  QSlider *volumeSlider;
+  QLabel *volumeLabel;
 
-    void setupUi(QWidget *Form)
-    {
-        if (Form->objectName().isEmpty())
-            Form->setObjectName(QString::fromUtf8("Form"));
-        Form->setEnabled(true);
-        Form->resize(400, 200);
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(Form->sizePolicy().hasHeightForWidth());
-        Form->setSizePolicy(sizePolicy);
-        Form->setMinimumSize(QSize(400, 200));
-        Form->setMaximumSize(QSize(960, 200));
-        horizontalLayout = new QHBoxLayout(Form);
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        playerMainControlsLayout = new QVBoxLayout();
-        playerMainControlsLayout->setObjectName(QString::fromUtf8("playerMainControlsLayout"));
-        infoTrack = new QLabel(Form);
-        infoTrack->setObjectName(QString::fromUtf8("infoTrack"));
-        QSizePolicy sizePolicy1(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(infoTrack->sizePolicy().hasHeightForWidth());
-        infoTrack->setSizePolicy(sizePolicy1);
-        QFont font;
-        font.setPointSize(16);
-        infoTrack->setFont(font);
-        infoTrack->setWordWrap(true);
-        infoTrack->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse);
+  void setupUi() {
+    if (this->QWidget::objectName().isEmpty())
+      this->QWidget::setObjectName(QString::fromUtf8("Form"));
+    this->setEnabled(true);
+    this->resize(400, 200);
+    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
+    this->setSizePolicy(sizePolicy);
+    this->setMinimumSize(QSize(200, 200));
+    this->setMaximumSize(QSize(960, 200));
+    horizontalLayout = new QHBoxLayout(this);
+    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    playerMainControlsLayout = new QVBoxLayout();
+    playerMainControlsLayout->setObjectName(
+        QString::fromUtf8("playerMainControlsLayout"));
+    infoTrack = new QLabel(this);
+    infoTrack->setObjectName(QString::fromUtf8("infoTrack"));
+    QSizePolicy sizePolicy1(QSizePolicy::MinimumExpanding,
+                            QSizePolicy::Preferred);
+    sizePolicy1.setHorizontalStretch(0);
+    sizePolicy1.setVerticalStretch(0);
+    sizePolicy1.setHeightForWidth(infoTrack->sizePolicy().hasHeightForWidth());
+    infoTrack->setSizePolicy(sizePolicy1);
+    QFont font;
+    font.setPointSize(16);
+    infoTrack->setFont(font);
+    infoTrack->setWordWrap(true);
+    infoTrack->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                       Qt::TextSelectableByMouse);
 
-        playerMainControlsLayout->addWidget(infoTrack);
+    playerMainControlsLayout->addWidget(infoTrack);
 
-        artistInfoLayout = new QHBoxLayout();
-        artistInfoLayout->setObjectName(QString::fromUtf8("artistInfoLayout"));
-        infoArtist = new QLabel(Form);
-        infoArtist->setObjectName(QString::fromUtf8("infoArtist"));
-        QFont font1;
-        font1.setPointSize(12);
-        infoArtist->setFont(font1);
-        infoArtist->setWordWrap(true);
-        infoArtist->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse);
+    artistInfoLayout = new QHBoxLayout();
+    artistInfoLayout->setObjectName(QString::fromUtf8("artistInfoLayout"));
+    infoArtist = new QLabel(this);
+    infoArtist->setObjectName(QString::fromUtf8("infoArtist"));
+    QFont font1;
+    font1.setPointSize(12);
+    infoArtist->setFont(font1);
+    infoArtist->setWordWrap(true);
+    infoArtist->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                        Qt::TextSelectableByMouse);
 
-        artistInfoLayout->addWidget(infoArtist);
+    artistInfoLayout->addWidget(infoArtist);
 
-        infoAlbum = new QLabel(Form);
-        infoAlbum->setObjectName(QString::fromUtf8("infoAlbum"));
-        infoAlbum->setFont(font1);
-        infoAlbum->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
-        infoAlbum->setWordWrap(true);
-        infoAlbum->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse);
+    infoAlbum = new QLabel(this);
+    infoAlbum->setObjectName(QString::fromUtf8("infoAlbum"));
+    infoAlbum->setFont(font1);
+    infoAlbum->setAlignment(Qt::AlignRight | Qt::AlignTrailing |
+                            Qt::AlignVCenter);
+    infoAlbum->setWordWrap(true);
+    infoAlbum->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                       Qt::TextSelectableByMouse);
 
-        artistInfoLayout->addWidget(infoAlbum);
+    artistInfoLayout->addWidget(infoAlbum);
 
+    playerMainControlsLayout->addLayout(artistInfoLayout);
 
-        playerMainControlsLayout->addLayout(artistInfoLayout);
+    infoFilename = new QLabel(this);
+    infoFilename->setObjectName(QString::fromUtf8("infoFilename"));
+    sizePolicy1.setHeightForWidth(
+        infoFilename->sizePolicy().hasHeightForWidth());
+    infoFilename->setSizePolicy(sizePolicy1);
+    QFont font2;
+    font2.setPointSize(7);
+    infoFilename->setFont(font2);
+    infoFilename->setWordWrap(true);
+    infoFilename->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                          Qt::TextSelectableByMouse);
 
-        infoFilename = new QLabel(Form);
-        infoFilename->setObjectName(QString::fromUtf8("infoFilename"));
-        sizePolicy1.setHeightForWidth(infoFilename->sizePolicy().hasHeightForWidth());
-        infoFilename->setSizePolicy(sizePolicy1);
-        QFont font2;
-        font2.setPointSize(7);
-        infoFilename->setFont(font2);
-        infoFilename->setWordWrap(true);
-        infoFilename->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse);
+    playerMainControlsLayout->addWidget(infoFilename);
 
-        playerMainControlsLayout->addWidget(infoFilename);
+    playerMainButtons = new QHBoxLayout();
+    playerMainButtons->setObjectName(QString::fromUtf8("playerMainButtons"));
+    prevButton = new QPushButton(this);
+    prevButton->setObjectName(QString::fromUtf8("prevButton"));
+    prevButton->setMinimumSize(QSize(0, 0));
+    prevButton->setMaximumSize(QSize(50, 50));
 
-        playerMainButtons = new QHBoxLayout();
-        playerMainButtons->setObjectName(QString::fromUtf8("playerMainButtons"));
-        prevButton = new QPushButton(Form);
-        prevButton->setObjectName(QString::fromUtf8("prevButton"));
-        prevButton->setMinimumSize(QSize(0, 0));
-        prevButton->setMaximumSize(QSize(50, 50));
+    playerMainButtons->addWidget(prevButton);
 
-        playerMainButtons->addWidget(prevButton);
+    playButton = new QPushButton(this);
+    playButton->setObjectName(QString::fromUtf8("playButton"));
+    playButton->setMinimumSize(QSize(0, 0));
+    playButton->setMaximumSize(QSize(50, 50));
+    playButton->setAutoFillBackground(false);
 
-        playButton = new QPushButton(Form);
-        playButton->setObjectName(QString::fromUtf8("playButton"));
-        playButton->setMinimumSize(QSize(0, 0));
-        playButton->setMaximumSize(QSize(50, 50));
-        playButton->setAutoFillBackground(false);
+    playerMainButtons->addWidget(playButton);
 
-        playerMainButtons->addWidget(playButton);
+    nextButton = new QPushButton(this);
+    nextButton->setObjectName(QString::fromUtf8("nextButton"));
+    nextButton->setMinimumSize(QSize(0, 0));
+    nextButton->setMaximumSize(QSize(50, 50));
 
-        nextButton = new QPushButton(Form);
-        nextButton->setObjectName(QString::fromUtf8("nextButton"));
-        nextButton->setMinimumSize(QSize(0, 0));
-        nextButton->setMaximumSize(QSize(50, 50));
+    playerMainButtons->addWidget(nextButton);
 
-        playerMainButtons->addWidget(nextButton);
+    playerMainControlsLayout->addLayout(playerMainButtons);
 
+    seekerLayout = new QHBoxLayout();
+    seekerLayout->setObjectName(QString::fromUtf8("seekerLayout"));
+    seekerLabel = new QLabel(this);
+    seekerLabel->setObjectName(QString::fromUtf8("seekerLabel"));
+    seekerLabel->setMaximumSize(QSize(16777215, 50));
 
-        playerMainControlsLayout->addLayout(playerMainButtons);
+    seekerLayout->addWidget(seekerLabel);
 
-        seekerLayout = new QHBoxLayout();
-        seekerLayout->setObjectName(QString::fromUtf8("seekerLayout"));
-        label_2 = new QLabel(Form);
-        label_2->setObjectName(QString::fromUtf8("label_2"));
-        label_2->setMaximumSize(QSize(16777215, 50));
+    seekerSlider = new QSlider(this);
+    seekerSlider->setObjectName(QString::fromUtf8("seekerSlider"));
+    seekerSlider->setMaximum(200);
+    seekerSlider->setOrientation(Qt::Horizontal);
+    seekerSlider->setTickPosition(QSlider::NoTicks);
 
-        seekerLayout->addWidget(label_2);
+    seekerLayout->addWidget(seekerSlider);
 
-        seekerSlider = new QSlider(Form);
-        seekerSlider->setObjectName(QString::fromUtf8("seekerSlider"));
-        seekerSlider->setMaximum(200);
-        seekerSlider->setOrientation(Qt::Horizontal);
-        seekerSlider->setTickPosition(QSlider::NoTicks);
+    playerMainControlsLayout->addLayout(seekerLayout);
 
-        seekerLayout->addWidget(seekerSlider);
+    auxButtonLayout = new QHBoxLayout();
+    auxButtonLayout->setObjectName(QString::fromUtf8("auxButtonLayout"));
+    loopComboBox = new QComboBox(this);
+    loopComboBox->setObjectName(QString::fromUtf8("loopComboBox"));
+    loopComboBox->setMaximumSize(QSize(100, 16777215));
 
+    auxButtonLayout->addWidget(loopComboBox);
 
-        playerMainControlsLayout->addLayout(seekerLayout);
+    shuffleButton = new QPushButton(this);
+    shuffleButton->setObjectName(QString::fromUtf8("shuffleButton"));
+    shuffleButton->setMinimumSize(QSize(35, 35));
+    shuffleButton->setMaximumSize(QSize(35, 35));
 
-        auxButtonLayout = new QHBoxLayout();
-        auxButtonLayout->setObjectName(QString::fromUtf8("auxButtonLayout"));
-        loopComboBox = new QComboBox(Form);
-        loopComboBox->setObjectName(QString::fromUtf8("loopComboBox"));
-        loopComboBox->setMaximumSize(QSize(100, 16777215));
+    auxButtonLayout->addWidget(shuffleButton);
 
-        auxButtonLayout->addWidget(loopComboBox);
+    addToFavouriteButton = new QPushButton(this);
+    addToFavouriteButton->setObjectName(
+        QString::fromUtf8("addToFavouriteButton"));
+    addToFavouriteButton->setMinimumSize(QSize(35, 35));
+    addToFavouriteButton->setMaximumSize(QSize(35, 35));
 
-        shuffleButton = new QPushButton(Form);
-        shuffleButton->setObjectName(QString::fromUtf8("shuffleButton"));
-        shuffleButton->setMinimumSize(QSize(35, 35));
-        shuffleButton->setMaximumSize(QSize(35, 35));
+    auxButtonLayout->addWidget(addToFavouriteButton);
 
-        auxButtonLayout->addWidget(shuffleButton);
+    addToPlaylistButton = new QPushButton(this);
+    addToPlaylistButton->setObjectName(
+        QString::fromUtf8("addToPlaylistButton"));
+    addToPlaylistButton->setMinimumSize(QSize(35, 35));
+    addToPlaylistButton->setMaximumSize(QSize(35, 35));
 
-        addToFavouriteButton = new QPushButton(Form);
-        addToFavouriteButton->setObjectName(QString::fromUtf8("addToFavouriteButton"));
-        addToFavouriteButton->setMinimumSize(QSize(35, 35));
-        addToFavouriteButton->setMaximumSize(QSize(35, 35));
+    auxButtonLayout->addWidget(addToPlaylistButton);
 
-        auxButtonLayout->addWidget(addToFavouriteButton);
+    playerMainControlsLayout->addLayout(auxButtonLayout);
 
-        addToPlaylistButton = new QPushButton(Form);
-        addToPlaylistButton->setObjectName(QString::fromUtf8("addToPlaylistButton"));
-        addToPlaylistButton->setMinimumSize(QSize(35, 35));
-        addToPlaylistButton->setMaximumSize(QSize(35, 35));
+    horizontalLayout->addLayout(playerMainControlsLayout);
 
-        auxButtonLayout->addWidget(addToPlaylistButton);
+    volumeLayout = new QVBoxLayout();
+    volumeLayout->setObjectName(QString::fromUtf8("volumeLayout"));
+    volumeLayout->setSizeConstraint(QLayout::SetMinimumSize);
+    volumeSlider = new QSlider(this);
+    volumeSlider->setObjectName(QString::fromUtf8("volumeSlider"));
+    volumeSlider->setMaximum(101);
+    volumeSlider->setOrientation(Qt::Vertical);
+    volumeSlider->setTickPosition(QSlider::TicksBelow);
 
+    volumeLayout->addWidget(volumeSlider, 0, Qt::AlignRight);
 
-        playerMainControlsLayout->addLayout(auxButtonLayout);
+    volumeLabel = new QLabel(this);
+    volumeLabel->setObjectName(QString::fromUtf8("volumeLabel"));
+    volumeLabel->setAlignment(Qt::AlignRight | Qt::AlignTrailing |
+                              Qt::AlignVCenter);
+    volumeLabel->setMinimumSize(QSize(50, 0));
+    volumeLayout->addWidget(volumeLabel, 0, Qt::AlignRight);
 
+    horizontalLayout->addLayout(volumeLayout);
 
-        horizontalLayout->addLayout(playerMainControlsLayout);
+    // Icons setup
+    prevButton->setIcon(QIcon(QString::fromStdString(Icons::PREV)));
+    nextButton->setIcon(QIcon(QString::fromStdString(Icons::NEXT)));
+    playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
 
-        volumeLayout = new QVBoxLayout();
-        volumeLayout->setObjectName(QString::fromUtf8("volumeLayout"));
-        volumeLayout->setSizeConstraint(QLayout::SetMinimumSize);
-        volumeSlider = new QSlider(Form);
-        volumeSlider->setObjectName(QString::fromUtf8("volumeSlider"));
-        volumeSlider->setMinimumSize(QSize(0, 0));
-        volumeSlider->setMaximum(100);
-        volumeSlider->setOrientation(Qt::Vertical);
-        volumeSlider->setTickPosition(QSlider::TicksBelow);
+    addToPlaylistButton->setIcon(QIcon(QString::fromStdString(Icons::TOLIST)));
+    addToFavouriteButton->setIcon(
+        QIcon(QString::fromStdString(Icons::TOFAVOURITE)));
+    shuffleButton->setIcon(QIcon(QString::fromStdString(Icons::SHUFFLE)));
 
-        volumeLayout->addWidget(volumeSlider, 0, Qt::AlignRight);
+    // Button actions connection
+    this->QWidget::connect(seekerSlider, &QSlider::sliderMoved, this,
+                           &Player::onSeekerMoved);
+    this->QWidget::connect(volumeSlider, &QSlider::sliderMoved, this,
+                           &Player::onVolumeMoved);
+    this->QWidget::connect(playButton, &QPushButton::pressed, this,
+                           &Player::onPlayPressed);
+    this->QWidget::connect(nextButton, &QPushButton::pressed, this,
+                           &Player::onNextPressed);
+    this->QWidget::connect(prevButton, &QPushButton::pressed, this,
+                           &Player::onPrevPressed);
+    this->QWidget::connect(shuffleButton, &QPushButton::pressed, this,
+                           &Player::onShufflePressed);
+    this->QWidget::connect(addToFavouriteButton, &QPushButton::pressed, this,
+                           &Player::onToFavouritePressed);
+    this->QWidget::connect(addToPlaylistButton, &QPushButton::pressed, this,
+                           &Player::onToPlaylistPressed);
 
-        volumeLabel = new QLabel(Form);
-        volumeLabel->setObjectName(QString::fromUtf8("volumeLabel"));
+    retranslateUi();
 
-        volumeLayout->addWidget(volumeLabel, 0, Qt::AlignRight);
+    QMetaObject::connectSlotsByName(this);
+  }  // setupUi
 
+  void retranslateUi() {
+    this->setWindowTitle(QCoreApplication::translate("Form", "Form", nullptr));
+    infoTrack->setText(QCoreApplication::translate("Form", "Track", nullptr));
+    infoArtist->setText(QCoreApplication::translate("Form", "Artist", nullptr));
+    infoAlbum->setText(QCoreApplication::translate("Form", "Album", nullptr));
+    infoFilename->setText(
+        QCoreApplication::translate("Form", "Filename", nullptr));
+    prevButton->setText(QString());
+    prevButton->setProperty("class",
+                            QVariant(QCoreApplication::translate(
+                                "Form", "squareButtonMedium", nullptr)));
+    playButton->setText(QString());
+    playButton->setProperty("class",
+                            QVariant(QCoreApplication::translate(
+                                "Form", "squareButtonMedium", nullptr)));
+    nextButton->setText(QString());
+    nextButton->setProperty("class",
+                            QVariant(QCoreApplication::translate(
+                                "Form", "squareButtonMedium", nullptr)));
+    seekerLabel->setText(QCoreApplication::translate("Form", "04:20", nullptr));
+    shuffleButton->setText(QString());
+    shuffleButton->setProperty("class",
+                               QVariant(QCoreApplication::translate(
+                                   "Form", "squareButtonSmall", nullptr)));
+    addToFavouriteButton->setText(QString());
+    addToFavouriteButton->setProperty(
+        "class", QVariant(QCoreApplication::translate(
+                     "Form", "squareButtonSmall", nullptr)));
+    addToPlaylistButton->setText(QString());
+    addToPlaylistButton->setProperty(
+        "class", QVariant(QCoreApplication::translate(
+                     "Form", "squareButtonSmall", nullptr)));
+    volumeLabel->setText(QCoreApplication::translate("Form", "100%", nullptr));
+  }  // retranslateUi
 
-        horizontalLayout->addLayout(volumeLayout);
-
-        // Icons setup
-        prevButton->setIcon(QIcon(QString::fromStdString(Icons::PREV)));
-        nextButton->setIcon(QIcon(QString::fromStdString(Icons::NEXT)));
-        playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
-
-        addToPlaylistButton->setIcon(QIcon(QString::fromStdString(Icons::TOLIST)));
-        addToFavouriteButton->setIcon(QIcon(QString::fromStdString(Icons::TOFAVOURITE)));
-        shuffleButton->setIcon(QIcon(QString::fromStdString(Icons::SHUFFLE)));
-
-        // Button actions connection
-        connect(seekerSlider,&QSlider::sliderMoved,this,&Player::onSeekerMoved);
-        connect(volumeSlider,&QSlider::sliderMoved,this,&Player::onVolumeMoved);
-        connect(playButton,&QPushButton::pressed,this,&Player::onPlayPressed);
-        connect(nextButton,&QPushButton::pressed,this,&Player::onNextPressed);
-        connect(prevButton,&QPushButton::pressed,this,&Player::onPrevPressed);
-        connect(shuffleButton,&QPushButton::pressed,this,&Player::onShufflePressed);
-        connect(addToFavouriteButton,&QPushButton::pressed,this,&Player::onToFavouritePressed);
-        connect(addToPlaylistButton,&QPushButton::pressed,this,&Player::onToPlaylistPressed);
-
-        retranslateUi(Form);
-
-        QMetaObject::connectSlotsByName(Form);
-    } // setupUi
-
-    void retranslateUi(QWidget *Form)
-    {
-        Form->setWindowTitle(QCoreApplication::translate("Form", "Form", nullptr));
-        infoTrack->setText(QCoreApplication::translate("Form", "Track", nullptr));
-        infoArtist->setText(QCoreApplication::translate("Form", "Artist", nullptr));
-        infoAlbum->setText(QCoreApplication::translate("Form", "Album", nullptr));
-        infoFilename->setText(QCoreApplication::translate("Form", "Filename", nullptr));
-        prevButton->setText(QString());
-        prevButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonMedium", nullptr)));
-        playButton->setText(QString());
-        playButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonMedium", nullptr)));
-        nextButton->setText(QString());
-        nextButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonMedium", nullptr)));
-        label_2->setText(QCoreApplication::translate("Form", "04:20", nullptr));
-        shuffleButton->setText(QString());
-        shuffleButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonSmall", nullptr)));
-        addToFavouriteButton->setText(QString());
-        addToFavouriteButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonSmall", nullptr)));
-        addToPlaylistButton->setText(QString());
-        addToPlaylistButton->setProperty("class", QVariant(QCoreApplication::translate("Form", "squareButtonSmall", nullptr)));
-        volumeLabel->setText(QCoreApplication::translate("Form", "100%", nullptr));
-    } // retranslateUi
-
-  Player(){
-    Player::setupUi(this);
+  Player() {}
+  void onMediaPlayerMediaChanged() {
+    Track currentTrack = soundmaker->getTrack();
+    try {
+      infoArtist->setText(QString::fromStdString(currentTrack.artists));
+      infoAlbum->setText(QString::fromStdString(currentTrack.album));
+      infoTrack->setText(QString::fromStdString(currentTrack.title));
+      infoFilename->setText(QString::fromStdString(currentTrack.filename));
+    } catch (...) {
+      // i don't care
+    }
   }
-  void onMediaPlayerMediaChange(){}
-  void onMediaPlayerPositionChanged(){}
-  void onMediaPlayerPlaying(){}
-  void onPlayPressed(){}
-  void onNextPressed(){}
-  void onPrevPressed(){}
-  void onSeekerMoved(){}
-  void onVolumeMoved(){}
-  void onNextTrackPressed(){}
-  void onPrevTrackPressed(){}
-  void onShufflePressed(){}
-  void onToFavouritePressed(){}
-  void onToPlaylistPressed(){}
+  void onMediaPlayerPositionChanged() {
+    seekerLabel->setText(
+        QString::fromStdString(secondsToTime(soundmaker->getTime() / 1000.0)));
+    if (!seekerSlider->isSliderDown()) {
+      seekerSlider->setValue(
+          (int)(seekerSlider->maximum() * soundmaker->getPosition()));
+    }
+  }
+  void onMediaPlayerPlaying() {
+    playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
+  }
+  void onMediaPlayerPaused() {
+    playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
+  }
+  void onPlayPressed() {
+    if (soundmaker->getIsPlaying()) {
+      soundmaker->pause();
+    } else {
+      soundmaker->play();
+    }
+  }
+  void onNextPressed() { soundmaker->next(); }
+  void onPrevPressed() { soundmaker->previous(); }
+  void onSeekerMoved() {
+    soundmaker->setPosition(seekerSlider->value() /
+                            (float)seekerSlider->maximum());
+  }
+  void onVolumeMoved() {
+    qreal logarithmicVolume = QAudio::convertVolume(
+        volumeSlider->value() / qreal(100), QAudio::LinearVolumeScale,
+        QAudio::LogarithmicVolumeScale);
+    soundmaker->player->setVolume((int)(logarithmicVolume * 100));
+    string txt = std::to_string(volumeSlider->value()) + "%";
+    volumeLabel->setText(QString::fromStdString(txt));
+  }
+  void onShufflePressed() {}
+  void onToFavouritePressed() {}
+  void onToPlaylistPressed() {}
+  void eventProcessor(const Types::Event &event) {
+    switch (event) {
+      case Types::Event::onMediaPlayerMediaChanged:
+        onMediaPlayerMediaChanged();
+        break;
+      case Types::Event::onMediaPlayerPositionChanged:
+        onMediaPlayerPositionChanged();
+        break;
+      case Types::Event::onMediaPlayerPlaying:
+        onMediaPlayerPlaying();
+        break;
+      case Types::Event::onMediaPlayerPaused:
+        onMediaPlayerPaused();
+        break;
+      case Types::Event::onMediaPlayerStopped:
+        onMediaPlayerPaused();
+        break;
+      default:
+        break;
+    }
+  }
 };
 
-
-
-
-
-#endif // PLAYERWIDGET_H
+#endif  // PLAYERWIDGET_H

@@ -1,254 +1,224 @@
 #pragma once
 
+#include <QMediaPlayer>
+#include <QUrl>
 #include <iostream>
 #include <vector>
-#include "macro.hpp"
+
+#include "Client.hpp"
 #include "Data.hpp"
-#include "ui/ui.hpp"
-#include "vlcpp/vlc.hpp"
+#include "StandartGlobalUser.hpp"
+#include "macro.hpp"
+// #include "vlcpp/vlc.hpp"
 
 using namespace std;
 
-class SoundMaker
-{
-private:
+class SoundMaker : public StandartGlobalCaller, public QObject {
+ private:
   bool _shuffled = false;
   Types::Loop _loopMode = Types::Loop::NONE;
   Track currentTrack;
   int _currentTrackIndex = -1;
   Playlist _currentPlaylist;
   Playlist _originalPlaylist;
-  VLC::Instance instance;
-  VLC::MediaPlayer player;
 
-  vector<StandartGlobalUser*> listeners;
-
-public:
-  Client client;
-  SoundMaker()
-  {
-    instance = VLC::Instance(0, nullptr);
-    instance.setUserAgent("Fried Music desktop", "FriedMusic/1.0");
-    player = VLC::MediaPlayer(instance);
-    VLC::EventManager events = player.eventManager();
-    libvlc_event_attach(events, libvlc_MediaPlayerMediaChanged, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerNothingSpecial, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerOpening, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerBuffering, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerPlaying, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerPaused, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerStopped, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerForward, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerBackward, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerStopping, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerEncounteredError, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerTimeChanged, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerPositionChanged, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerLengthChanged, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerVout, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerESAdded, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerESDeleted, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerESSelected, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerCorked, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerUncorked, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerMuted, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerUnmuted, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerAudioVolume, SoundMaker::vlcEventProcessor, this);
-    libvlc_event_attach(events, libvlc_MediaPlayerAudioDevice, SoundMaker::vlcEventProcessor, this);
+  // Cuz Qt is bullshit, but better than other
+ public slots:
+  void AUTHENTICATION_TRYED() {}
+  void FILES_UPDATED() {}
+  void SOUNDMAKER_PLAYLIST_SET() {}
+  void onMediaPlayerMediaChanged() {}
+  void onMediaPlayerNothingSpecial() {}
+  void onMediaPlayerOpening() {}
+  void onMediaPlayerBuffering() {}
+  void onMediaPlayerPlaying() {}
+  void onMediaPlayerPaused() {}
+  void onMediaPlayerStopped() {}
+  void onMediaPlayerForward() {}
+  void onMediaPlayerBackward() {}
+  void onMediaPlayerEncounteredError() {}
+  void onMediaPlayerTimeChanged() {}
+  void onMediaPlayerPositionChanged() {
+    eventProcessor(Types::Event::onMediaPlayerPositionChanged);
   }
-
-  static void vlcEventProcessor(const struct libvlc_event_t *p_event, void *p_data);
-  void eventProcessor(Types::Event event);
-  void registerListeners(StandartGlobalUser* object);
-  void registerListeners(vector<StandartGlobalUser*> object);
-  void previous();
-  void next();
-  void play() { player.play(); };
-  void pause() { player.pause(); };
-  void stop() { player.stopAsync(); };
-  // setters
-  void setVolume(int newVolume)
-  {
-    player.setVolume(std::clamp(newVolume, 0, 100));
-  };
-  void setPosition(float newPosition)
-  {
-    player.setPosition(std::clamp(newPosition, 0.0f, 1.0f), true);
-  };
-  void setTime(float time)
-  {
-    player.setTime(time, true);
-  }
-  void setCurrentIndex(int value)
-  {
-    _currentTrackIndex = value;
-  }
-  void setPlaylist(Playlist &playlist)
-  {
-    _currentPlaylist = playlist;
-    _originalPlaylist = playlist;
-    if (getIsShuffled()){
-      setShuffled(true);
+  void onMediaPlayerLengthChanged() {}
+  void onMediaPlayerVout() {}
+  void onMediaPlayerESAdded() {}
+  void onMediaPlayerESDeleted() {}
+  void onMediaPlayerESSelected() {}
+  void onMediaPlayerCorked() {}
+  void onMediaPlayerUncorked() {}
+  void onMediaPlayerMuted() {}
+  void onMediaPlayerUnmuted() {}
+  void onMediaPlayerAudioVolume() {}
+  void onMediaPlayerAudioDevice() {}
+  void QtStateRedirector() {
+    switch (player->state()) {
+      case QMediaPlayer::StoppedState:
+        eventProcessor(Types::Event::onMediaPlayerStopped);
+        break;
+      case QMediaPlayer::PlayingState:
+        eventProcessor(Types::Event::onMediaPlayerPlaying);
+        break;
+      case QMediaPlayer::PausedState:
+        eventProcessor(Types::Event::onMediaPlayerPaused);
+        break;
     }
   }
-  void setPlaylist(Source &playlist)
-  {
+  void QtMediaRedirector() {
+    switch (player->mediaStatus()) {
+      case QMediaPlayer::UnknownMediaStatus:
+        eventProcessor(Types::Event::unknown);
+        break;
+      case QMediaPlayer::NoMedia:
+        eventProcessor(Types::Event::unknown);
+        break;
+      case QMediaPlayer::LoadingMedia:
+        eventProcessor(Types::Event::onMediaPlayerOpening);
+        break;
+      case QMediaPlayer::LoadedMedia:
+        eventProcessor(Types::Event::onMediaPlayerOpened);
+        break;
+      case QMediaPlayer::StalledMedia:
+        eventProcessor(Types::Event::onMediaPlayerCorked);
+        break;
+      case QMediaPlayer::BufferingMedia:
+        eventProcessor(Types::Event::onMediaPlayerBuffering);
+        break;
+      case QMediaPlayer::BufferedMedia:
+        eventProcessor(Types::Event::onMediaPlayerBuffered);
+        break;
+      case QMediaPlayer::EndOfMedia:
+        eventProcessor(Types::Event::onMediaPlayerMediaFinished);
+        QtStateRedirector();
+        onMediaFinished();
+        break;
+      case QMediaPlayer::InvalidMedia:
+        eventProcessor(Types::Event::unknown);
+        break;
+      default:
+        break;
+    }
+  }
+
+ public:
+  Client client;
+  QMediaPlayer *player;
+  SoundMaker() {
+    player = new QMediaPlayer;
+    player->setVolume(0);
+    QObject::connect(player, &QMediaPlayer::positionChanged, this,
+                     &SoundMaker::onMediaPlayerPositionChanged);
+    QObject::connect(player, &QMediaPlayer::stateChanged, this,
+                     &SoundMaker::QtStateRedirector);
+    QObject::connect(player, &QMediaPlayer::mediaStatusChanged, this,
+                     &SoundMaker::QtMediaRedirector);
+  }
+
+  void previous() {
+    bool shouldPlay = player->state() == QMediaPlayer::PlayingState;
+    if (_currentTrackIndex > 0) {
+      setCurrentIndex(_currentTrackIndex - 1);
+    }
+    if (shouldPlay){
+      play();
+    }
+  };
+  void next() {
+    if (_currentTrackIndex >= _currentPlaylist.size() - 1) {
+      setCurrentIndex(0);
+    } else {
+      setCurrentIndex(_currentTrackIndex + 1);
+    }
+    play();
+  };
+  // setters
+  void setPosition(float pos) { player->setPosition(pos * player->duration()); }
+  void setVolume(int vol) { player->setVolume(vol); }
+  void play() { player->play(); }
+  void pause() { player->pause(); }
+
+  void setTime(float time) { this->setPosition(player->duration() / time); }
+  void setCurrentIndex(int value) {
+    _currentTrackIndex = value;
+    currentTrack = _currentPlaylist.tracks[value];
+    setTrack(currentTrack);
+  }
+  void setPlaylist(Playlist playlist, int index = 0) {
+    _currentPlaylist = playlist;
+    _originalPlaylist = playlist;
+    if (getIsShuffled()) {
+      setShuffled(true);
+    }
+    setCurrentIndex(index);
+    eventProcessor(Types::Event::SOUNDMAKER_PLAYLIST_SET);
+  }
+  void setPlaylist(Source playlist) {
     Playlist prepared = client.getPlaylistFromSource(playlist);
     setPlaylist(prepared);
   }
-  void setShuffled(bool value)
-  {
-    _shuffled = value;
+  void setShuffled(bool value) { _shuffled = value; }
+  void setLoopMode(Types::Loop newLoop) { _loopMode = newLoop; }
+  void setUrl(string url) {
+    player->setMedia(QUrl(QString::fromStdString(url)));
   }
-  void setLoopMode(Types::Loop newLoop)
-  {
-    _loopMode = newLoop;
-  }
-  void setUrl(const string url)
-  {
-    VLC::Media media(url,VLC::Media::FromType::FromLocation);
-    player.setMedia(media);
-  }
-  void setTrack(Track track)
-  {
+  void setTrack(Track track) {
+    if (track.source.pathType == Types::PathType::URL) {
+      player->setMedia(QUrl(QString::fromStdString(track.source.path)));
+    } else if (track.source.pathType == Types::PathType::FILESYSTEMPATH) {
+      player->setMedia(
+          QUrl::fromLocalFile(QString::fromStdString(track.source.path)));
+    }
+    eventProcessor(Types::Event::onMediaPlayerMediaChanged);
   }
   // getters
-  int getVolume()
-  {
-    return player.volume();
+  int getVolume() { return player->volume(); }
+
+  float getPosition() {
+    int curTime = player->position();
+    int maxTime = player->duration();
+    if (curTime != 0) {
+      float pos = (float)curTime / (float)maxTime;
+      return pos;
+    } else {
+      return 0.0;
+    }
   }
 
-  float getPosition()
-  {
-    return player.position();
-  }
+  float getTime() { return player->position(); }
 
-  float getTime()
-  {
-    return player.time();
-  }
+  float getLength() { return static_cast<int>(player->duration()); }
 
-  float getLength()
-  {
-    return player.length();
-  }
+  Types::Loop getLoopMode() { return (_loopMode); }
+  Track getTrack() { return currentTrack; }
 
-  Types::Loop getLoopMode()
-  {
-    return (_loopMode);
-  }
-
-  bool getIsShuffled()
-  {
-    return (_shuffled);
+  bool getIsShuffled() { return (_shuffled); }
+  bool getIsPlaying() { return player->state() == QMediaPlayer::PlayingState; }
+  Playlist getCurrentPlaylist() { return _currentPlaylist; }
+  void onMediaFinished() {
+    switch (_loopMode) {
+      case Types::Loop::NONE:
+        next();
+        play();
+        break;
+      case Types::Loop::TRACKONCE:
+        setPosition(0);
+        play();
+        setLoopMode(Types::Loop::NONE);
+        break;
+      case Types::Loop::TRACK:
+        setPosition(0);
+        play();
+        break;
+      case Types::Loop::PLAYLISTONCE:
+        next();
+        play();
+        setLoopMode(Types::Loop::NONE);
+        break;
+      case Types::Loop::PLAYLIST:
+        next();
+        play();
+        break;
+    }
   }
 };
-
-void SoundMaker::vlcEventProcessor(const struct libvlc_event_t *p_event, void *p_data)
-{
-  for (StandartGlobalUser *listener : ((SoundMaker *)p_data)->listeners)
-  {
-    switch (p_event->type)
-    {
-    case libvlc_MediaPlayerMediaChanged:
-      listener->onMediaPlayerMediaChanged();
-      break;
-    case libvlc_MediaPlayerNothingSpecial:
-      listener->onMediaPlayerNothingSpecial();
-      break;
-    case libvlc_MediaPlayerOpening:
-      listener->onMediaPlayerOpening();
-      break;
-    case libvlc_MediaPlayerBuffering:
-      listener->onMediaPlayerBuffering();
-      break;
-    case libvlc_MediaPlayerPlaying:
-      listener->onMediaPlayerPlaying();
-      break;
-    case libvlc_MediaPlayerPaused:
-      listener->onMediaPlayerPaused();
-      break;
-    case libvlc_MediaPlayerStopped:
-      listener->onMediaPlayerStopped();
-      break;
-    case libvlc_MediaPlayerForward:
-      listener->onMediaPlayerForward();
-      break;
-    case libvlc_MediaPlayerBackward:
-      listener->onMediaPlayerBackward();
-      break;
-    case libvlc_MediaPlayerStopping:
-      // test it before use
-      listener->onMediaPlayerMediaChanged();
-      break;
-    case libvlc_MediaPlayerEncounteredError:
-      listener->onMediaPlayerEncounteredError();
-      break;
-    case libvlc_MediaPlayerTimeChanged:
-      listener->onMediaPlayerTimeChanged();
-      break;
-    case libvlc_MediaPlayerPositionChanged:
-      listener->onMediaPlayerPositionChanged();
-      break;
-    case libvlc_MediaPlayerLengthChanged:
-      listener->onMediaPlayerLengthChanged();
-      break;
-    case libvlc_MediaPlayerVout:
-      listener->onMediaPlayerVout();
-      break;
-    case libvlc_MediaPlayerESAdded:
-      listener->onMediaPlayerESAdded();
-      break;
-    case libvlc_MediaPlayerESDeleted:
-      listener->onMediaPlayerESDeleted();
-      break;
-    case libvlc_MediaPlayerESSelected:
-      listener->onMediaPlayerESSelected();
-      break;
-    case libvlc_MediaPlayerCorked:
-      listener->onMediaPlayerCorked();
-      break;
-    case libvlc_MediaPlayerUncorked:
-      listener->onMediaPlayerUncorked();
-      break;
-    case libvlc_MediaPlayerMuted:
-      listener->onMediaPlayerMuted();
-      break;
-    case libvlc_MediaPlayerUnmuted:
-      listener->onMediaPlayerUnmuted();
-      break;
-    case libvlc_MediaPlayerAudioVolume:
-      listener->onMediaPlayerAudioVolume();
-      break;
-    case libvlc_MediaPlayerAudioDevice:
-      listener->onMediaPlayerAudioDevice();
-      break;
-    }
-  }
-}
-void SoundMaker::eventProcessor(Types::Event event)
-{
-  for (StandartGlobalUser *listener : listeners)
-  {
-    switch (event)
-    {
-    case Types::Event::AUTHENTICATION_TRYED:
-      listener->onAuthenticationTryed();
-      break;
-    case Types::Event::FILES_UPDATED:
-      listener->onFilesUpdated();
-      break;
-    case Types::Event::SOUNDMAKER_PLAYLIST_SET:
-      listener->onSoundMakerPlaylistInsert();
-      break;
-    }
-  }
-}
-
-void SoundMaker::registerListeners(StandartGlobalUser* object){
-  listeners.push_back(object);
-}
-
-void SoundMaker::registerListeners(vector<StandartGlobalUser*> objects){
-  listeners.insert(std::end(listeners),std::begin(objects),std::end(objects));
-}

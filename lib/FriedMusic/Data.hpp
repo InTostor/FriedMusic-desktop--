@@ -2,51 +2,115 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "macro.hpp"
 using namespace std;
 
-
-class Types{
-public:
-enum class StorageType{LOCAL,REMOTE,ANY,NONE};
-enum class PathType{URL,FILESYSTEMPATH,ANY,NONE};
-enum class DataType{DATA,TRACK,PLAYLIST,BLOCKLIST,ALBUM,ARTISTSTRACKS,LOCALDATABASE,ANY,NONE};
-enum class Loop{NONE,TRACKONCE,TRACK,PLAYLISTONCE,PLAYLIST};
-enum class Event{AUTHENTICATION_TRYED,FILES_UPDATED,SOUNDMAKER_PLAYLIST_SET};
+namespace Types {
+enum class StorageType { LOCAL, REMOTE, ANY, NONE };
+enum class PathType { URL, FILESYSTEMPATH, ANY, NONE };
+enum class DataType {
+  DATA,
+  TRACK,
+  PLAYLIST,
+  BLOCKLIST,
+  ALBUM,
+  ARTISTSTRACKS,
+  LOCALDATABASE,
+  ANY,
+  NONE
 };
+enum class Loop { NONE, TRACKONCE, TRACK, PLAYLISTONCE, PLAYLIST };
+// most types are VLC names, even when QT used
+enum Event {
+  unknown,
+  AUTHENTICATION_TRYED,
+  FILES_UPDATED,
+  SOUNDMAKER_PLAYLIST_SET,
+  onMediaPlayerMediaChanged,
+  onMediaPlayerNothingSpecial,
+  onMediaPlayerOpening,
+  onMediaPlayerOpened,
+  onMediaPlayerBuffering,
+  onMediaPlayerBuffered,
+  onMediaPlayerPlaying,
+  onMediaPlayerPaused,
+  onMediaPlayerStopped,
+  onMediaPlayerMediaFinished,
+  onMediaPlayerForward,
+  onMediaPlayerBackward,
+  onMediaPlayerEncounteredError,
+  onMediaPlayerTimeChanged,
+  onMediaPlayerPositionChanged,
+  onMediaPlayerLengthChanged,
+  onMediaPlayerVout,
+  onMediaPlayerESAdded,
+  onMediaPlayerESDeleted,
+  onMediaPlayerESSelected,
+  onMediaPlayerCorked,
+  onMediaPlayerUncorked,
+  onMediaPlayerMuted,
+  onMediaPlayerUnmuted,
+  onMediaPlayerAudioVolume,
+  onMediaPlayerAudioDevice
+};
+};  // namespace Types
 
-class Source{
-public:
-  string path;
+class Source {
+ public:
+  std::string path;
   Types::StorageType storageType;
   Types::PathType pathType;
   Types::DataType dataType;
-  Source(string setpath,Types::StorageType setstorageType,Types::PathType setpathType,Types::DataType setdataType);
-  Source(string setpath);
-  Source();
-  string getVlcPath();
+  Source(std::string setpath, Types::StorageType setstorageType,
+         Types::PathType setpathType, Types::DataType setdataType) {
+    path = setpath;
+    storageType = setstorageType;
+    pathType = setpathType;
+    dataType = setdataType;
+  }
+  Source(std::string setpath) {
+    path = setpath;
+    storageType = Types::StorageType::ANY;
+    pathType = Types::PathType::ANY;
+    dataType = Types::DataType::ANY;
+  }
+  Source() {
+    path = "";
+    storageType = Types::StorageType::NONE;
+    pathType = Types::PathType::NONE;
+    dataType = Types::DataType::NONE;
+  }
+  std::string getUrlEncodedPath() {
+    if (pathType == Types::PathType::URL) {
+      std::string out = path;
+      out = ReplaceInString(out, "&", "%26");
+      out = ReplaceInString(out, " ", "%20");
+      return out;
+    } else {
+      return path;
+    }
+  }
 };
 
-class Track{
-public:
-  string title;
-  string album;
-  string artists;
-  string genre;
-  string filename;
+struct Track {
+  std::string title = "";
+  std::string album = "";
+  std::string artists = "";
+  std::string genre = "";
+  std::string filename = "";
 
-  int albumTrackNumber;
-  int year;
-  int duration;
+  int albumTrackNumber = -1;
+  int year = -1;
+  int duration = -1;
 
   bool isAssembled;
   Source source;
 };
 
-class Playlist{
-public:
+struct Playlist {
   vector<Track> tracks;
-  string name;
-  bool isDynamic;
-  void saveLocally();
-  void shuffle(int startingOriginalIndex);
+  std::string name = "";
+  bool isDynamic = false;
+  int size() { return distance(tracks.begin(), tracks.end()); }
 };
