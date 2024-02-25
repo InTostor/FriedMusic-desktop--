@@ -38,10 +38,12 @@ int main(int argc, char* argv[]) {
   client->authenticate("InTostor", "Cummunism");
   // client->downloadDatabase();
 
-  Source plSource("./userdata/favourite.fpl", Types::StorageType::LOCAL,
+  Source plSource("./userdata/history.fpl", Types::StorageType::LOCAL,
                   Types::PathType::FILESYSTEMPATH, Types::DataType::PLAYLIST);
   Playlist pl = client->getPlaylistFromSource(plSource, true);
+
   soundmaker->setPlaylist(pl);
+  
   mainWindow->show();
 
   return app.exec();

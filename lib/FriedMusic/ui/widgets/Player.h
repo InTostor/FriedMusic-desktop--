@@ -14,11 +14,14 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMap>
+#include <QMediaPlayer>
 #include <QPushButton>
 #include <QSlider>
 #include <QVBoxLayout>
 #include <QVariant>
 #include <QWidget>
+#include <iostream>
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
@@ -47,6 +50,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
   QVBoxLayout *volumeLayout;
   QSlider *volumeSlider;
   QLabel *volumeLabel;
+  QMap<QString, Types::Loop> *loopModesQEnum = new QMap<QString, Types::Loop>;
 
   void setupUi() {
     if (this->QWidget::objectName().isEmpty())
@@ -128,6 +132,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     prevButton->setObjectName(QString::fromUtf8("prevButton"));
     prevButton->setMinimumSize(QSize(0, 0));
     prevButton->setMaximumSize(QSize(50, 50));
+    prevButton->setToolTip("Previous track");
 
     playerMainButtons->addWidget(prevButton);
 
@@ -136,6 +141,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     playButton->setMinimumSize(QSize(0, 0));
     playButton->setMaximumSize(QSize(50, 50));
     playButton->setAutoFillBackground(false);
+    playButton->setToolTip("Play/pause");
 
     playerMainButtons->addWidget(playButton);
 
@@ -143,6 +149,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     nextButton->setObjectName(QString::fromUtf8("nextButton"));
     nextButton->setMinimumSize(QSize(0, 0));
     nextButton->setMaximumSize(QSize(50, 50));
+    nextButton->setToolTip("Next track");
 
     playerMainButtons->addWidget(nextButton);
 
@@ -226,6 +233,13 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     nextButton->setIcon(QIcon(QString::fromStdString(Icons::NEXT)));
     playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
 
+    loopModesQEnum->insert("None", Types::Loop::NONE);
+    loopModesQEnum->insert("Track once", Types::Loop::TRACKONCE);
+    loopModesQEnum->insert("Track", Types::Loop::TRACK);
+    loopModesQEnum->insert("Playlist once", Types::Loop::PLAYLISTONCE);
+    loopModesQEnum->insert("Playlist", Types::Loop::PLAYLIST);
+    loopComboBox->addItems(QStringList(loopModesQEnum->keys()));
+
     addToPlaylistButton->setIcon(QIcon(QString::fromStdString(Icons::TOLIST)));
     addToFavouriteButton->setIcon(
         QIcon(QString::fromStdString(Icons::TOFAVOURITE)));
@@ -248,6 +262,8 @@ class Player : public virtual StandartGlobalUser, public QWidget {
                            &Player::onToFavouritePressed);
     this->QWidget::connect(addToPlaylistButton, &QPushButton::pressed, this,
                            &Player::onToPlaylistPressed);
+    this->QWidget::connect(loopComboBox, &QComboBox::currentTextChanged, this,
+                           &Player::onLoopComboboxSelected);
 
     retranslateUi();
 
@@ -339,6 +355,9 @@ class Player : public virtual StandartGlobalUser, public QWidget {
   void onShufflePressed() {}
   void onToFavouritePressed() {}
   void onToPlaylistPressed() {}
+  void onLoopComboboxSelected() {
+    soundmaker->setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
+  }
   void eventProcessor(const Types::Event &event) {
     switch (event) {
       case Types::Event::onMediaPlayerMediaChanged:
@@ -355,6 +374,17 @@ class Player : public virtual StandartGlobalUser, public QWidget {
         break;
       case Types::Event::onMediaPlayerStopped:
         onMediaPlayerPaused();
+        break;
+      case Types::Event::onMediaPlayerMediaFinished:
+
+        if (soundmaker->getIsPlaying()) {
+          playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
+        } else {
+          playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
+        }
+        break;
+      case Types::Event::onMediaPlayerLoopModeChanged:
+        loopComboBox->setCurrentText(loopModesQEnum->key(soundmaker->getLoopMode()));
         break;
       default:
         break;

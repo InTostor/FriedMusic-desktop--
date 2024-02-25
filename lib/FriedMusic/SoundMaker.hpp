@@ -120,7 +120,7 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
     if (_currentTrackIndex > 0) {
       setCurrentIndex(_currentTrackIndex - 1);
     }
-    if (shouldPlay){
+    if (shouldPlay) {
       play();
     }
   };
@@ -135,8 +135,14 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
   // setters
   void setPosition(float pos) { player->setPosition(pos * player->duration()); }
   void setVolume(int vol) { player->setVolume(vol); }
-  void play() { player->play(); }
-  void pause() { player->pause(); }
+  void play() {
+    player->play();
+    eventProcessor(Types::Event::onMediaPlayerPlaying);
+  }
+  void pause() {
+    player->pause();
+    eventProcessor(Types::Event::onMediaPlayerPaused);
+  }
 
   void setTime(float time) { this->setPosition(player->duration() / time); }
   void setCurrentIndex(int value) {
@@ -145,6 +151,7 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
     setTrack(currentTrack);
   }
   void setPlaylist(Playlist playlist, int index = 0) {
+    
     _currentPlaylist = playlist;
     _originalPlaylist = playlist;
     if (getIsShuffled()) {
@@ -158,7 +165,10 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
     setPlaylist(prepared);
   }
   void setShuffled(bool value) { _shuffled = value; }
-  void setLoopMode(Types::Loop newLoop) { _loopMode = newLoop; }
+  void setLoopMode(Types::Loop newLoop) {
+    _loopMode = newLoop;
+    eventProcessor(Types::Event::onMediaPlayerLoopModeChanged);
+  }
   void setUrl(string url) {
     player->setMedia(QUrl(QString::fromStdString(url)));
   }
@@ -166,8 +176,8 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
     if (track.source.pathType == Types::PathType::URL) {
       player->setMedia(QUrl(QString::fromStdString(track.source.path)));
     } else if (track.source.pathType == Types::PathType::FILESYSTEMPATH) {
-      player->setMedia(
-          QUrl::fromLocalFile(QString::fromStdString(track.source.path)));
+      player->setMedia(QUrl::fromLocalFile(
+          QString::fromStdString(filesystem::absolute(track.source.path))));
     }
     eventProcessor(Types::Event::onMediaPlayerMediaChanged);
   }
@@ -184,6 +194,7 @@ class SoundMaker : public StandartGlobalCaller, public QObject {
       return 0.0;
     }
   }
+  QMediaPlayer::State getState() { return player->state(); }
 
   float getTime() { return player->position(); }
 

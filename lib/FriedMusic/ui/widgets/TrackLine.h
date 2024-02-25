@@ -1,11 +1,3 @@
-/********************************************************************************
-** Form generated from reading UI file 'TrackLineYosydD.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.3
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
-
 #ifndef TRACKLINE_H
 #define TRACKLINE_H
 
@@ -22,6 +14,9 @@
 #include "../../StandartGlobalUser.hpp"
 #include "../../macro.hpp"
 #include "../ui.hpp"
+#include <iostream>
+
+using namespace std;
 
 class TrackLine : public virtual StandartGlobalUser, public QWidget {
  public:
@@ -50,7 +45,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     if (this->objectName().isEmpty())
       this->setObjectName(QString::fromUtf8("form"));
     this->resize(669, 82);
-    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
@@ -120,6 +115,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     sizePolicy2.setHeightForWidth(
         artistsLabel->sizePolicy().hasHeightForWidth());
     artistsLabel->setSizePolicy(sizePolicy2);
+    artistsLabel->setWordWrap(true);
     QFont font1;
     font1.setKerning(true);
     font1.setPointSize(10);
@@ -134,6 +130,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
 
     albumLabel = new QLabel(this);
     albumLabel->setObjectName(QString::fromUtf8("albumLabel"));
+    albumLabel->setWordWrap(true);
     sizePolicy2.setHeightForWidth(albumLabel->sizePolicy().hasHeightForWidth());
     albumLabel->setSizePolicy(sizePolicy2);
 
@@ -146,6 +143,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     sizePolicy1.setHeightForWidth(
         filenameLabel->sizePolicy().hasHeightForWidth());
     filenameLabel->setSizePolicy(sizePolicy1);
+    filenameLabel->setWordWrap(true);
     QFont font2;
     font2.setPointSize(8);
     filenameLabel->setFont(font2);
@@ -166,7 +164,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     extraButton = new QPushButton(this);
     extraButton->setIcon(QIcon(QString::fromStdString(Icons::MOREVERT)));
     extraButton->setObjectName(QString::fromUtf8("extraButton"));
-    extraButton->setMaximumSize(QSize(35, 35));
+    extraButton->setMaximumSize(QSize(30, 30));
 
     horizontalLayout_2->addWidget(extraButton);
 
@@ -222,6 +220,16 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
 
     } else {
       soundmaker->setCurrentIndex(indexInPlaylist);
+      soundmaker->play();
+    }
+  }
+  // update existence in playlists, load state
+  void updateRelation(bool isInFAvourite, bool isDownloaded){
+    if (isDownloaded){
+    }
+
+    if (isInFAvourite){
+
     }
   }
 
@@ -241,6 +249,8 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
         break;
       case Types::Event::onMediaPlayerPaused:
         eventProcessor(Types::Event::onMediaPlayerMediaChanged);
+        break;
+      case Types::Event::FILES_UPDATED:
         break;
       default:
         break;

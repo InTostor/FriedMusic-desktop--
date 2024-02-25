@@ -10,11 +10,13 @@
 #define SETTINGS_H
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QVariant>
@@ -29,32 +31,50 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
   QTabWidget *tabWidget;
   QWidget *accountConf;
   QFormLayout *formLayout_2;
-  QWidget *tab;
+  QLabel *label_10;
+  QVBoxLayout *verticalLayout_2;
+  QLineEdit *lineEdit_7;
+  QLineEdit *lineEdit_8;
+  QPushButton *pushButton;
+  QWidget *behaviourTab;
   QGridLayout *gridLayout;
-  QVBoxLayout *verticalLayout_3;
   QVBoxLayout *verticalLayout_4;
+  QLabel *label_8;
+  QHBoxLayout *horizontalLayout_8;
+  QVBoxLayout *verticalLayout_3;
+  QCheckBox *checkBox_4;
+  QCheckBox *checkBox;
+  QHBoxLayout *horizontalLayout_7;
+  QLabel *label_7;
+  QCheckBox *checkBox_2;
+  QCheckBox *checkBox_3;
+  QSpacerItem *verticalSpacer;
+  QSpacerItem *horizontalSpacer;
   QWidget *pathsConf;
   QGridLayout *gridLayout_3;
-  QVBoxLayout *remotePaths;
+  QHBoxLayout *horizontalLayout_10;
+  QVBoxLayout *remotePathsLayout;
   QHBoxLayout *horizontalLayout_3;
   QLabel *label_3;
-  QLineEdit *lineEdit;
+  QLineEdit *ApiUrlLineEdit;
   QHBoxLayout *horizontalLayout;
   QLabel *label_2;
-  QLineEdit *lineEdit_2;
+  QLineEdit *RemoteMusicLineEdit;
   QHBoxLayout *horizontalLayout_2;
   QLabel *label;
-  QLineEdit *lineEdit_3;
-  QVBoxLayout *verticalLayout_2;
+  QLineEdit *RemoteUserdataLineEdit;
+  QVBoxLayout *localPathsLayout;
   QHBoxLayout *horizontalLayout_6;
   QLabel *label_6;
-  QLineEdit *lineEdit_5;
+  QLineEdit *DatabasePathLineEdit;
   QHBoxLayout *horizontalLayout_4;
   QLabel *label_5;
-  QLineEdit *lineEdit_4;
+  QLineEdit *LocalMusicLineEdit;
   QHBoxLayout *horizontalLayout_5;
   QLabel *label_4;
-  QLineEdit *lineEdit_6;
+  QLineEdit *LocalDataLineEdit;
+  QLabel *label_9;
+  QSpacerItem *verticalSpacer_2;
   QWidget *aboutPage;
   QVBoxLayout *verticalLayout;
   QLabel *aboutPageHeader;
@@ -64,41 +84,120 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
   QLabel *aboutPageLabel_4;
 
   void setupUi() {
-    if (this->QWidget::objectName().isEmpty())
-      this->QWidget::setObjectName(QString::fromUtf8("Settings"));
-    this->resize(756, 422);
-    this->setAttribute(Qt::WA_DeleteOnClose);
-    verticalLayout_5 = new QVBoxLayout(this);
+    QWidget *Settings = this;
+    if (Settings->objectName().isEmpty())
+      Settings->setObjectName(QString::fromUtf8("Settings"));
+    Settings->resize(516, 335);
+    verticalLayout_5 = new QVBoxLayout(Settings);
     verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
-    tabWidget = new QTabWidget(this);
+    tabWidget = new QTabWidget(Settings);
     tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
     tabWidget->setTabPosition(QTabWidget::West);
     accountConf = new QWidget();
     accountConf->setObjectName(QString::fromUtf8("accountConf"));
     formLayout_2 = new QFormLayout(accountConf);
     formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
+    label_10 = new QLabel(accountConf);
+    label_10->setObjectName(QString::fromUtf8("label_10"));
+    QFont font;
+    font.setPointSize(36);
+    label_10->setFont(font);
+
+    formLayout_2->setWidget(0, QFormLayout::LabelRole, label_10);
+
+    verticalLayout_2 = new QVBoxLayout();
+    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+    verticalLayout_2->setContentsMargins(0, 0, -1, -1);
+    lineEdit_7 = new QLineEdit(accountConf);
+    lineEdit_7->setObjectName(QString::fromUtf8("lineEdit_7"));
+
+    verticalLayout_2->addWidget(lineEdit_7);
+
+    lineEdit_8 = new QLineEdit(accountConf);
+    lineEdit_8->setObjectName(QString::fromUtf8("lineEdit_8"));
+    lineEdit_8->setEchoMode(QLineEdit::Password);
+
+    verticalLayout_2->addWidget(lineEdit_8);
+
+    pushButton = new QPushButton(accountConf);
+    pushButton->setObjectName(QString::fromUtf8("pushButton"));
+
+    verticalLayout_2->addWidget(pushButton);
+
+    formLayout_2->setLayout(1, QFormLayout::LabelRole, verticalLayout_2);
+
     tabWidget->addTab(accountConf, QString());
-    tab = new QWidget();
-    tab->setObjectName(QString::fromUtf8("tab"));
-    gridLayout = new QGridLayout(tab);
+    behaviourTab = new QWidget();
+    behaviourTab->setObjectName(QString::fromUtf8("behaviourTab"));
+    gridLayout = new QGridLayout(behaviourTab);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-    verticalLayout_3 = new QVBoxLayout();
-    verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
-
-    gridLayout->addLayout(verticalLayout_3, 0, 0, 1, 1);
-
     verticalLayout_4 = new QVBoxLayout();
     verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
+    label_8 = new QLabel(behaviourTab);
+    label_8->setObjectName(QString::fromUtf8("label_8"));
+    label_8->setFont(font);
 
-    gridLayout->addLayout(verticalLayout_4, 0, 1, 1, 1);
+    verticalLayout_4->addWidget(label_8);
 
-    tabWidget->addTab(tab, QString());
+    horizontalLayout_8 = new QHBoxLayout();
+    horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
+    verticalLayout_3 = new QVBoxLayout();
+    verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
+    checkBox_4 = new QCheckBox(behaviourTab);
+    checkBox_4->setObjectName(QString::fromUtf8("checkBox_4"));
+
+    verticalLayout_3->addWidget(checkBox_4);
+
+    checkBox = new QCheckBox(behaviourTab);
+    checkBox->setObjectName(QString::fromUtf8("checkBox"));
+
+    verticalLayout_3->addWidget(checkBox);
+
+    horizontalLayout_7 = new QHBoxLayout();
+    horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
+    label_7 = new QLabel(behaviourTab);
+    label_7->setObjectName(QString::fromUtf8("label_7"));
+
+    horizontalLayout_7->addWidget(label_7);
+
+    checkBox_2 = new QCheckBox(behaviourTab);
+    checkBox_2->setObjectName(QString::fromUtf8("checkBox_2"));
+
+    horizontalLayout_7->addWidget(checkBox_2);
+
+    checkBox_3 = new QCheckBox(behaviourTab);
+    checkBox_3->setObjectName(QString::fromUtf8("checkBox_3"));
+
+    horizontalLayout_7->addWidget(checkBox_3);
+
+    verticalLayout_3->addLayout(horizontalLayout_7);
+
+    verticalSpacer =
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    verticalLayout_3->addItem(verticalSpacer);
+
+    horizontalLayout_8->addLayout(verticalLayout_3);
+
+    horizontalSpacer =
+        new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    horizontalLayout_8->addItem(horizontalSpacer);
+
+    verticalLayout_4->addLayout(horizontalLayout_8);
+
+    gridLayout->addLayout(verticalLayout_4, 0, 0, 1, 1);
+
+    tabWidget->addTab(behaviourTab, QString());
     pathsConf = new QWidget();
     pathsConf->setObjectName(QString::fromUtf8("pathsConf"));
     gridLayout_3 = new QGridLayout(pathsConf);
     gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
-    remotePaths = new QVBoxLayout();
-    remotePaths->setObjectName(QString::fromUtf8("remotePaths"));
+    horizontalLayout_10 = new QHBoxLayout();
+    horizontalLayout_10->setObjectName(
+        QString::fromUtf8("horizontalLayout_10"));
+    remotePathsLayout = new QVBoxLayout();
+    remotePathsLayout->setObjectName(QString::fromUtf8("remotePathsLayout"));
     horizontalLayout_3 = new QHBoxLayout();
     horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
     label_3 = new QLabel(pathsConf);
@@ -106,12 +205,12 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_3->addWidget(label_3);
 
-    lineEdit = new QLineEdit(pathsConf);
-    lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
+    ApiUrlLineEdit = new QLineEdit(pathsConf);
+    ApiUrlLineEdit->setObjectName(QString::fromUtf8("ApiUrlLineEdit"));
 
-    horizontalLayout_3->addWidget(lineEdit);
+    horizontalLayout_3->addWidget(ApiUrlLineEdit);
 
-    remotePaths->addLayout(horizontalLayout_3);
+    remotePathsLayout->addLayout(horizontalLayout_3);
 
     horizontalLayout = new QHBoxLayout();
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
@@ -120,12 +219,13 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout->addWidget(label_2);
 
-    lineEdit_2 = new QLineEdit(pathsConf);
-    lineEdit_2->setObjectName(QString::fromUtf8("lineEdit_2"));
+    RemoteMusicLineEdit = new QLineEdit(pathsConf);
+    RemoteMusicLineEdit->setObjectName(
+        QString::fromUtf8("RemoteMusicLineEdit"));
 
-    horizontalLayout->addWidget(lineEdit_2);
+    horizontalLayout->addWidget(RemoteMusicLineEdit);
 
-    remotePaths->addLayout(horizontalLayout);
+    remotePathsLayout->addLayout(horizontalLayout);
 
     horizontalLayout_2 = new QHBoxLayout();
     horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -134,17 +234,18 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_2->addWidget(label);
 
-    lineEdit_3 = new QLineEdit(pathsConf);
-    lineEdit_3->setObjectName(QString::fromUtf8("lineEdit_3"));
+    RemoteUserdataLineEdit = new QLineEdit(pathsConf);
+    RemoteUserdataLineEdit->setObjectName(
+        QString::fromUtf8("RemoteUserdataLineEdit"));
 
-    horizontalLayout_2->addWidget(lineEdit_3);
+    horizontalLayout_2->addWidget(RemoteUserdataLineEdit);
 
-    remotePaths->addLayout(horizontalLayout_2);
+    remotePathsLayout->addLayout(horizontalLayout_2);
 
-    gridLayout_3->addLayout(remotePaths, 1, 1, 1, 1);
+    horizontalLayout_10->addLayout(remotePathsLayout);
 
-    verticalLayout_2 = new QVBoxLayout();
-    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+    localPathsLayout = new QVBoxLayout();
+    localPathsLayout->setObjectName(QString::fromUtf8("localPathsLayout"));
     horizontalLayout_6 = new QHBoxLayout();
     horizontalLayout_6->setObjectName(QString::fromUtf8("horizontalLayout_6"));
     label_6 = new QLabel(pathsConf);
@@ -152,12 +253,13 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_6->addWidget(label_6);
 
-    lineEdit_5 = new QLineEdit(pathsConf);
-    lineEdit_5->setObjectName(QString::fromUtf8("lineEdit_5"));
+    DatabasePathLineEdit = new QLineEdit(pathsConf);
+    DatabasePathLineEdit->setObjectName(
+        QString::fromUtf8("DatabasePathLineEdit"));
 
-    horizontalLayout_6->addWidget(lineEdit_5);
+    horizontalLayout_6->addWidget(DatabasePathLineEdit);
 
-    verticalLayout_2->addLayout(horizontalLayout_6);
+    localPathsLayout->addLayout(horizontalLayout_6);
 
     horizontalLayout_4 = new QHBoxLayout();
     horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
@@ -166,12 +268,12 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_4->addWidget(label_5);
 
-    lineEdit_4 = new QLineEdit(pathsConf);
-    lineEdit_4->setObjectName(QString::fromUtf8("lineEdit_4"));
+    LocalMusicLineEdit = new QLineEdit(pathsConf);
+    LocalMusicLineEdit->setObjectName(QString::fromUtf8("LocalMusicLineEdit"));
 
-    horizontalLayout_4->addWidget(lineEdit_4);
+    horizontalLayout_4->addWidget(LocalMusicLineEdit);
 
-    verticalLayout_2->addLayout(horizontalLayout_4);
+    localPathsLayout->addLayout(horizontalLayout_4);
 
     horizontalLayout_5 = new QHBoxLayout();
     horizontalLayout_5->setObjectName(QString::fromUtf8("horizontalLayout_5"));
@@ -180,14 +282,27 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_5->addWidget(label_4);
 
-    lineEdit_6 = new QLineEdit(pathsConf);
-    lineEdit_6->setObjectName(QString::fromUtf8("lineEdit_6"));
+    LocalDataLineEdit = new QLineEdit(pathsConf);
+    LocalDataLineEdit->setObjectName(QString::fromUtf8("LocalDataLineEdit"));
 
-    horizontalLayout_5->addWidget(lineEdit_6);
+    horizontalLayout_5->addWidget(LocalDataLineEdit);
 
-    verticalLayout_2->addLayout(horizontalLayout_5);
+    localPathsLayout->addLayout(horizontalLayout_5);
 
-    gridLayout_3->addLayout(verticalLayout_2, 1, 2, 1, 1);
+    horizontalLayout_10->addLayout(localPathsLayout);
+
+    gridLayout_3->addLayout(horizontalLayout_10, 1, 0, 1, 1);
+
+    label_9 = new QLabel(pathsConf);
+    label_9->setObjectName(QString::fromUtf8("label_9"));
+    label_9->setFont(font);
+
+    gridLayout_3->addWidget(label_9, 0, 0, 1, 1);
+
+    verticalSpacer_2 =
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    gridLayout_3->addItem(verticalSpacer_2, 2, 0, 1, 1);
 
     tabWidget->addTab(pathsConf, QString());
     aboutPage = new QWidget();
@@ -197,8 +312,6 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     aboutPageHeader = new QLabel(aboutPage);
     aboutPageHeader->setObjectName(QString::fromUtf8("aboutPageHeader"));
     aboutPageHeader->setMaximumSize(QSize(16777215, 70));
-    QFont font;
-    font.setPointSize(36);
     aboutPageHeader->setFont(font);
 
     verticalLayout->addWidget(aboutPageHeader);
@@ -236,21 +349,51 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     verticalLayout_5->addWidget(tabWidget);
 
-    retranslateUi(this);
+    retranslateUi(Settings);
 
-    tabWidget->setCurrentIndex(0);
+    tabWidget->setCurrentIndex(2);
 
-    QMetaObject::connectSlotsByName(static_cast<QWidget*>(this));
+    QMetaObject::connectSlotsByName(Settings);
+    // get current config
+    ApiUrlLineEdit->setText(QString::fromStdString(getConfigValue("apiUrl")));
+    RemoteMusicLineEdit->setText(QString::fromStdString(getConfigValue("musicStorageUrl")));
+    RemoteUserdataLineEdit->setText(QString::fromStdString(getConfigValue("userdataStorageUrl")));
+    DatabasePathLineEdit->setText(QString::fromStdString(getConfigValue("databasePath")));
+    LocalMusicLineEdit->setText(QString::fromStdString(getConfigValue("localMusicStoragePath")));
+    LocalDataLineEdit->setText(QString::fromStdString(getConfigValue("localUserdataStoragePath")));
+
   }  // setupUi
 
   void retranslateUi(QWidget *Settings) {
     Settings->setWindowTitle(
         QCoreApplication::translate("Settings", "Form", nullptr));
+    label_10->setText(
+        QCoreApplication::translate("Settings", "Account", nullptr));
+    lineEdit_7->setInputMask(QString());
+    lineEdit_7->setPlaceholderText(
+        QCoreApplication::translate("Settings", "Login", nullptr));
+    lineEdit_8->setText(QString());
+    lineEdit_8->setPlaceholderText(
+        QCoreApplication::translate("Settings", "Password", nullptr));
+    pushButton->setText(
+        QCoreApplication::translate("Settings", "Login", nullptr));
     tabWidget->setTabText(
         tabWidget->indexOf(accountConf),
         QCoreApplication::translate("Settings", "Account", nullptr));
+    label_8->setText(
+        QCoreApplication::translate("Settings", "App behaviour", nullptr));
+    checkBox_4->setText(QCoreApplication::translate(
+        "Settings", "Authenticate on server on start", nullptr));
+    checkBox->setText(QCoreApplication::translate(
+        "Settings", "Pull remote on start", nullptr));
+    label_7->setText(
+        QCoreApplication::translate("Settings", "Push remote", nullptr));
+    checkBox_2->setText(
+        QCoreApplication::translate("Settings", "on close", nullptr));
+    checkBox_3->setText(
+        QCoreApplication::translate("Settings", "on any update", nullptr));
     tabWidget->setTabText(
-        tabWidget->indexOf(tab),
+        tabWidget->indexOf(behaviourTab),
         QCoreApplication::translate("Settings", "Behaviour", nullptr));
     label_3->setText(
         QCoreApplication::translate("Settings", "API URl", nullptr));
@@ -264,6 +407,7 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
         "Settings", "Local music storage", nullptr));
     label_4->setText(QCoreApplication::translate(
         "Settings", "Local userdata storage", nullptr));
+    label_9->setText(QCoreApplication::translate("Settings", "Paths", nullptr));
     tabWidget->setTabText(
         tabWidget->indexOf(pathsConf),
         QCoreApplication::translate("Settings", "Paths", nullptr));
@@ -272,19 +416,18 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     aboutPageLabel_1->setText(
         QCoreApplication::translate("Settings", "Fried Music", nullptr));
     aboutPageLabel_2->setText(
-        QCoreApplication::translate("Settings", "Python+Qt+VLC 1.0", nullptr));
+        QCoreApplication::translate("Settings", "Qt 5 multiplatform", nullptr));
     aboutPageLabel_3->setText(QCoreApplication::translate(
         "Settings", "Music player with remote/self hosted library", nullptr));
     aboutPageLabel_4->setText(QCoreApplication::translate(
-        "Settings", "2023 InTostor. MIT license", nullptr));
+        "Settings", "InTostor. MIT license", nullptr));
     tabWidget->setTabText(
         tabWidget->indexOf(aboutPage),
         QCoreApplication::translate("Settings", "About", nullptr));
   }  // retranslateUi
 
   Settings() {}
-  ~Settings() {
-  }
+  ~Settings() {}
 };
 
 #endif  // SETTINGS_H

@@ -28,14 +28,21 @@ class Client : public StandartGlobalCaller {
     string url = getConfigValue("apiUrl") + "/authenticate.php";
     cpr::Response response =
         cpr::Get(cpr::Url(url),
-                 cpr::Authentication(username, password, cpr::AuthMode::BASIC));
+                 cpr::Authentication(username, password, cpr::AuthMode::BASIC),
+                 cpr::Timeout{3000});
+    if (response.elapsed > 3000) {
+      eventProcessor(Types::Event::API_CONNECTION_FAILED);
+      return;
+    }
     cookies = response.cookies;
     if (response.status_code == 200) {
       this->_authenticated = true;
       this->_username = username;
+      eventProcessor(Types::Event::AUTHENTICATION_SUCCESS);
     } else {
       this->_authenticated = false;
       this->_username = "anonymous";
+      eventProcessor(Types::Event::AUTHENTICATION_FAILED);
     }
     eventProcessor(Types::Event::AUTHENTICATION_TRYED);
   }
@@ -242,11 +249,81 @@ class Client : public StandartGlobalCaller {
       break;
     }
   };
-  // bad implementation. rewrite with single query
-  void assembleTrack(vector<Track*> tracks) {
-    for (int i = 0; i < tracks.size(); i++) {
-      assembleTrack(tracks[i]);
+
+  vector<Track> assembleTracks(vector<Track> tracks) {
+    // bad implementation. rewrite with single query
+    // for (int i = 0; i < tracks.size(); i++) {
+    //   assembleTrack(tracks[i]);
+    // }
+    // Handle big lists with sql query size limit
+    if (distance(tracks.begin(), tracks.end()) > 500) {
+      vector<Track> left = sliceVector(tracks, 0, 499);
+      vector<Track> right = sliceVector(tracks, 500, tracks.size() - 1);
+      left = assembleTracks(left);
+      right = assembleTracks(right);
+      left.insert(left.end(), right.begin(), right.end());
+      return left;
     }
+    string sql =
+        "SELECT title, album, tracknumber, genre, year, duration, artist, "
+        "filename "
+        "FROM fullmeta WHERE filename IN(";
+    vector<string> zeros;
+    vector<string> filenames;
+    for (int i = 0; i < tracks.size(); i++) {
+      zeros.push_back("?");
+      filenames.push_back(tracks[i].filename);
+    }
+    sql += join(zeros, ",");
+    sql += ")";
+    SQLite::Database db(getConfigValue("databasePath"));
+
+    SQLite::Statement query(db, sql);
+
+    for (int i = 0; i < tracks.size(); i++) {
+      query.bind(i + 1, tracks[i].filename);
+    }
+    int i = 0;
+    while (query.executeStep()) {
+      const char* filename;
+      const char* title;
+      const char* album;
+      const char* genre;
+      int albumTrackNumber;
+      int year;
+      int duration;
+      const char* artists;
+      title = query.getColumn(0);
+      album = query.getColumn(1);
+      genre = query.getColumn(3);
+      albumTrackNumber = query.getColumn(2);
+      year = query.getColumn(4);
+      duration = query.getColumn(5);
+      artists = query.getColumn(6);
+      filename = query.getColumn(7);
+
+      vector<Track>::iterator it =
+          std::find_if(tracks.begin(), tracks.end(),
+                       [&](Track const& t) { return t.filename == filename; });
+      while (it != tracks.end()) {
+        
+        if ((*it).filename == filename) {
+          int trackIndexFound = it - tracks.begin();
+          tracks[trackIndexFound].title = title;
+          tracks[trackIndexFound].album = album;
+          tracks[trackIndexFound].albumTrackNumber = albumTrackNumber;
+          tracks[trackIndexFound].genre = genre;
+          tracks[trackIndexFound].year = year;
+          tracks[trackIndexFound].duration = duration;
+          tracks[trackIndexFound].artists = artists;
+          tracks[trackIndexFound].isAssembled = true;
+        }
+        it++;
+      }
+
+      i++;
+    }
+    return tracks;
   };
 
   Playlist getPlaylistFromSource(Source source, bool assemble = false) {
@@ -271,14 +348,18 @@ class Client : public StandartGlobalCaller {
       if (found) {
         string filename;
         istringstream lineStream(response.text);
+
         while (std::getline(lineStream, filename, '\n')) {
           Track track;
           track.filename = filename;
           track.source = lookupTrack(filename);
-          if (assemble) {
-            assembleTrack(&track);
-          }
+          // if (assemble) {
+          // assembleTrack(&track);
+          // }
           playlist.tracks.push_back(track);
+        }
+        if (assemble) {
+          playlist.tracks = assembleTracks(playlist.tracks);
         }
       }
     } else if (source.pathType == Types::PathType::FILESYSTEMPATH) {
@@ -288,16 +369,19 @@ class Client : public StandartGlobalCaller {
         return playlist;  // handle it somehow
       } else {
         string filename;
+
         while (std::getline(file, filename)) {
           Track track;
           track.filename = filename;
           track.source = lookupTrack(filename);
-          if (assemble) {
-            assembleTrack(&track);
-          }
+          // if (assemble) {
+          //   assembleTrack(&track);
+          // }
           playlist.tracks.push_back(track);
         }
-
+        if (assemble) {
+          playlist.tracks = assembleTracks(playlist.tracks);
+        }
         file.close();
       }
 
@@ -306,4 +390,33 @@ class Client : public StandartGlobalCaller {
     }
     return playlist;
   };
+  bool isTrackInPlaylist(Track track, Playlist playlist) {
+    for (Track _track : playlist.tracks) {
+      if (_track.filename == track.filename) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool isTrackInPlaylist(Track track, Source source) {
+    return isTrackInPlaylist(track, getPlaylistFromSource(source));
+  }
+
+  bool isTrackDownloaded(Track track) {
+    return std::filesystem::exists(
+        getConfigValue("localMusicStoragePath") +
+        string(filesystem::path(track.filename).filename()));
+  }
+  bool isSourceExistsLocally(Source source) {
+    string path;
+    if (source.dataType == Types::DataType::TRACK) {
+      path = getConfigValue("localMusicStoragePath") +
+             string(filesystem::path(source.path).filename());
+    } else if (source.dataType == Types::DataType::PLAYLIST) {
+      path = getConfigValue("localUserdataStoragePath") +
+             string(filesystem::path(source.path).filename());
+    }
+    return std::filesystem::exists(path);
+  }
 };

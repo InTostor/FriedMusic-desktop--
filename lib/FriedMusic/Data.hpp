@@ -20,13 +20,19 @@ enum class DataType {
   ANY,
   NONE
 };
-enum class Loop { NONE, TRACKONCE, TRACK, PLAYLISTONCE, PLAYLIST };
+enum Loop { NONE, TRACKONCE, TRACK, PLAYLISTONCE, PLAYLIST };
 // most types are VLC names, even when QT used
 enum Event {
   unknown,
   AUTHENTICATION_TRYED,
+  AUTHENTICATION_SUCCESS,
+  AUTHENTICATION_FAILED,
+  DATABASE_LOAD_FAILED,
+  API_CONNECTION_FAILED,
+  STORAGE_CONNECTION_FAILED,
   FILES_UPDATED,
   SOUNDMAKER_PLAYLIST_SET,
+  onMediaPlayerLoopModeChanged,
   onMediaPlayerMediaChanged,
   onMediaPlayerNothingSpecial,
   onMediaPlayerOpening,
@@ -98,7 +104,7 @@ struct Track {
   std::string album = "";
   std::string artists = "";
   std::string genre = "";
-  std::string filename = "";
+  std::string filename = ""; //unique global track identifier
 
   int albumTrackNumber = -1;
   int year = -1;

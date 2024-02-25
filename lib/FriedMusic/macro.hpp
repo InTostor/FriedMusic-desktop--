@@ -20,11 +20,16 @@ std::string ReplaceInString(std::string subject, const std::string &search,
   }
   return subject;
 }
-std::string join(std::vector<std::string> const &strings, std::string delim) {
-  std::stringstream ss;
-  std::copy(strings.begin(), strings.end(),
-            std::ostream_iterator<std::string>(ss, delim.c_str()));
-  return ss.str();
+template <typename T>
+std::string join(const T& v, const std::string& delim) {
+    std::ostringstream s;
+    for (const auto& i : v) {
+        if (&i != &v[0]) {
+            s << delim;
+        }
+        s << i;
+    }
+    return s.str();
 }
 std::string getConfigValue(const std::string &key) {
   std::ifstream file("config.json");
@@ -36,6 +41,26 @@ std::string getConfigValue(const std::string &key) {
     return config[key];
   }
 }
+
+void setConfigValue(const std::string &key, const std::string &value) {
+  std::ifstream file("config.json");
+  if (!file.is_open()) {
+    return;
+  }else{
+    nlohmann::json config = nlohmann::json::parse(file);
+    config[key] = value;
+  }
+}
+void setConfigValue(const std::string &key, const int &value) {
+  std::ifstream file("config.json");
+  if (!file.is_open()) {
+    return;
+  }else{
+    nlohmann::json config = nlohmann::json::parse(file);
+    config[key] = value;
+  }
+}
+
 
 void downloadFile(std::string url, std::string destination) {
   cpr::Response response = cpr::Get(cpr::Url(url));
@@ -73,15 +98,54 @@ std::string secondsToTime(int seconds) {
     ret = std::to_string(hour) + ":";
   }
   if (minute <= 9) {
-    ret = ret + "0"+std::to_string(minute) + ":";
+    ret = ret + "0" + std::to_string(minute) + ":";
   } else if (minute > 9) {
     ret = ret + std::to_string(minute) + ":";
   }
   if (second <= 9) {
-    ret = ret + "0"+std::to_string(second);
+    ret = ret + "0" + std::to_string(second);
   } else if (second > 9) {
     ret = ret + std::to_string(second);
   }
 
   return ret;
 }
+
+template <typename T>
+std::vector<T> sliceVector(std::vector<T> const& v,
+                  int X, int Y)
+{
+ 
+    // Begin and End iterator
+    auto first = v.begin() + X;
+    auto last = v.begin() + Y + 1;
+ 
+    // Copy the element
+    std::vector<T> vector(first, last);
+ 
+    // Return the results
+    return vector;
+}
+
+typedef int64_t msec_t;
+#if defined(__WIN32__)
+
+#include <windows.h>
+
+msec_t time_ms(void)
+{
+    return timeGetTime();
+}
+
+#else
+
+#include <sys/time.h>
+
+msec_t time_ms(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (msec_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+#endif
