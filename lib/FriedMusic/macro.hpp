@@ -1,7 +1,9 @@
 #pragma once
+#ifndef MACRO_H
+#define MACRO_H
 #include <cpr/cpr.h>
 
-#include <../nlohman/json.hpp>
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -11,7 +13,7 @@
 #include <string>
 #include <vector>
 
-std::string ReplaceInString(std::string subject, const std::string &search,
+inline std::string ReplaceInString(std::string subject, const std::string &search,
                             const std::string &replace) {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {
@@ -20,8 +22,9 @@ std::string ReplaceInString(std::string subject, const std::string &search,
   }
   return subject;
 }
+
 template <typename T>
-std::string join(const T& v, const std::string& delim) {
+inline std::string join(const T& v, const std::string& delim) {
     std::ostringstream s;
     for (const auto& i : v) {
         if (&i != &v[0]) {
@@ -31,7 +34,7 @@ std::string join(const T& v, const std::string& delim) {
     }
     return s.str();
 }
-std::string getConfigValue(const std::string &key) {
+inline std::string getConfigValue(const std::string &key) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
     // harakiri or try to get something
@@ -42,7 +45,7 @@ std::string getConfigValue(const std::string &key) {
   }
 }
 
-void setConfigValue(const std::string &key, const std::string &value) {
+inline void setConfigValue(const std::string &key, const std::string &value) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
     return;
@@ -51,7 +54,7 @@ void setConfigValue(const std::string &key, const std::string &value) {
     config[key] = value;
   }
 }
-void setConfigValue(const std::string &key, const int &value) {
+inline void setConfigValue(const std::string &key, const int &value) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
     return;
@@ -62,31 +65,31 @@ void setConfigValue(const std::string &key, const int &value) {
 }
 
 
-void downloadFile(std::string url, std::string destination) {
+inline void downloadFile(std::string url, std::string destination) {
   cpr::Response response = cpr::Get(cpr::Url(url));
   std::ofstream file(destination);
   file << response.text;
   file.close();
 }
 
-void downloadFile(cpr::Url url, std::string destination) {
+inline void downloadFile(cpr::Url url, std::string destination) {
   cpr::Response response = cpr::Get(url);
   std::ofstream file(destination);
   file << response.text;
   file.close();
 }
 
-void downloadFileAsync(std::string url, std::string destination) {
+inline void downloadFileAsync(std::string url, std::string destination) {
   std::ofstream of(destination);
   cpr::Response r = cpr::Download(of, cpr::Url(url));
 }
 
-void downloadFileAsync(cpr::Url &url, std::string &destination) {
+inline void downloadFileAsync(cpr::Url &url, std::string &destination) {
   std::ofstream of(destination);
   cpr::Response r = cpr::Download(of, url);
 }
 
-std::string secondsToTime(int seconds) {
+inline std::string secondsToTime(int seconds) {
   // prebuilt string format aren't reliable
   int hour = seconds / 3600;
   int minute = (seconds % 3600) / 60;
@@ -112,7 +115,7 @@ std::string secondsToTime(int seconds) {
 }
 
 template <typename T>
-std::vector<T> sliceVector(std::vector<T> const& v,
+inline std::vector<T> sliceVector(std::vector<T> const& v,
                   int X, int Y)
 {
  
@@ -132,7 +135,7 @@ typedef int64_t msec_t;
 
 #include <windows.h>
 
-msec_t time_ms(void)
+inline msec_t time_ms(void)
 {
     return timeGetTime();
 }
@@ -141,11 +144,13 @@ msec_t time_ms(void)
 
 #include <sys/time.h>
 
-msec_t time_ms(void)
+inline msec_t time_ms(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (msec_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
+
+#endif
 
 #endif

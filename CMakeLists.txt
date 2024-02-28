@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(FriedMusic++ VERSION 0.1.0 LANGUAGES C CXX)
+SET(CMAKE_COLOR_MAKEFILE ON)
 # SET(CMAKE_CXX_FLAGS "-O3 -mavx2 -mbmi2 -march=native -Ofast -frename-registers -fopenmp")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMakeChecksCache)
 
@@ -11,14 +12,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 SET(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
 
-
-set(SOURCE_FILES main.cpp)
-
-include_directories(lib)
-link_directories(lib)
-
-include_directories(lib/FriedMusic)
-link_directories(lib/FriedMusic)
 
 # Include CPR library as
 include(FetchContent)
@@ -35,28 +28,24 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 
-# For finding Qt
 
-file(GLOB_RECURSE FriedMusicLib
-     "lib/*.hpp"
-     "lib/*.cpp"
-)
-add_library(lib ${FriedMusicLib})
-
+# include SQLiteCpp
+link_directories(${PROJECT_NAME} "lib/sqlite_modern_cpp")
 include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 
-add_executable( ${PROJECT_NAME} ${SOURCE_FILES} )
+file(GLOB SOURCES 
+"lib/FriedMusic/*.cpp"
+# "lib/FriedMusic/*.hpp"
+# "lib/FriedMusic/*.h"
+)
+set (SOURCES ${SOURCES} "main.cpp")
+include_directories(${PROJECT_SOURCE_DIR}/lib/FriedMusic)
 
-# libvlc
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package(LIBVLC REQUIRED)
-include_directories(${LIBVLC_INCLUDE_DIR})
+add_executable( ${PROJECT_NAME} ${SOURCES})
 
-
-target_link_libraries( ${PROJECT_NAME} lib )
+# target_link_libraries( ${PROJECT_NAME} SOURCES )
 target_link_libraries( ${PROJECT_NAME} cpr::cpr )
-target_link_libraries(${PROJECT_NAME} ${LIBVLC_LIBRARY})
 target_link_libraries(${PROJECT_NAME} 
 SQLiteCpp
 sqlite3
@@ -74,7 +63,11 @@ target_link_libraries(${PROJECT_NAME}
     Qt::Multimedia
 )
 
-
+#include json
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 
 
 include(CTest)

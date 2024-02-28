@@ -4,7 +4,7 @@
 
 #include "Data.hpp"
 #include "macro.hpp"
-#include "nlohman/json.hpp"
+#include <nlohmann/json.hpp>
 #include <cpr/cpr.h>
 
 using namespace std;

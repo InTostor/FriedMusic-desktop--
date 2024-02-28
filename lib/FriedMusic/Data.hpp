@@ -7,6 +7,7 @@
 using namespace std;
 
 namespace Types {
+/// @brief ANY is used to lookup real type
 enum class StorageType { LOCAL, REMOTE, ANY, NONE };
 enum class PathType { URL, FILESYSTEMPATH, ANY, NONE };
 enum class DataType {

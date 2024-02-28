@@ -84,7 +84,7 @@ class TrackList : public virtual StandartGlobalUser, public QWidget {
     }
   }
   void onFilesUpdated() {
-    Source favSource("./userdata/history.fpl", Types::StorageType::LOCAL,
+    Source favSource("./userdata/favourite.fpl", Types::StorageType::LOCAL,
                      Types::PathType::FILESYSTEMPATH,
                      Types::DataType::PLAYLIST);
 

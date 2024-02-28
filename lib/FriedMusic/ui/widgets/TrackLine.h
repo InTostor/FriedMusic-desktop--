@@ -9,12 +9,13 @@
 #include <QVBoxLayout>
 #include <QVariant>
 #include <QWidget>
+#include <iostream>
 
 #include "../../Data.hpp"
 #include "../../StandartGlobalUser.hpp"
 #include "../../macro.hpp"
 #include "../ui.hpp"
-#include <iostream>
+#include "Modals.h"
 
 using namespace std;
 
@@ -133,6 +134,8 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     albumLabel->setWordWrap(true);
     sizePolicy2.setHeightForWidth(albumLabel->sizePolicy().hasHeightForWidth());
     albumLabel->setSizePolicy(sizePolicy2);
+    albumLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                        Qt::TextSelectableByMouse);
 
     horizontalLayout_3->addWidget(albumLabel);
 
@@ -147,6 +150,8 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     QFont font2;
     font2.setPointSize(8);
     filenameLabel->setFont(font2);
+    filenameLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse |
+                                           Qt::TextSelectableByMouse);
 
     verticalLayout_2->addWidget(filenameLabel);
 
@@ -172,6 +177,8 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
 
     this->connect(playButton, &QPushButton::pressed, this,
                   &TrackLine::onPlayPressed);
+    this->connect(extraButton, &QPushButton::pressed, this,
+                  &TrackLine::onExtraPressed);
 
     retranslateUi(this);
 
@@ -203,12 +210,11 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     durationLabel->setText(
         QString::fromStdString(secondsToTime(track.duration)));
     if (soundmaker->getTrack().filename == track.filename and
-            soundmaker->getIsPlaying()) {
+        soundmaker->getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
     }
-    
   }
   void onPlayPressed() {
     if (soundmaker->getTrack().filename == track.filename) {
@@ -223,13 +229,21 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
       soundmaker->play();
     }
   }
+  void onExtraPressed() {
+    TrackActionsModal *modal = new TrackActionsModal();
+    modal->setGlobals(soundmaker, client);
+    modal->setup(track);
+    QPoint globalCursorPos = QCursor::pos();
+    modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
+                       modal->geometry().x(), modal->geometry().y());
+    modal->show();
+  }
   // update existence in playlists, load state
-  void updateRelation(bool isInFAvourite, bool isDownloaded){
-    if (isDownloaded){
+  void updateRelation(bool isInFAvourite, bool isDownloaded) {
+    if (isDownloaded) {
     }
 
-    if (isInFAvourite){
-
+    if (isInFAvourite) {
     }
   }
 

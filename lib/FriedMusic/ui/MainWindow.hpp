@@ -5,12 +5,12 @@
 #include <QWidget>
 #include <Qt>
 
-#include "StandartGlobalUser.hpp"
-#include "ui.hpp"
-#include "widgets/Finder.h"
-#include "widgets/Player.h"
-#include "widgets/StatusBar.h"
-#include "widgets/TrackList.h"
+#include "lib/FriedMusic/StandartGlobalUser.hpp"
+#include "lib/FriedMusic/ui/ui.hpp"
+#include "lib/FriedMusic/ui/widgets/Finder.h"
+#include "lib/FriedMusic/ui/widgets/Player.h"
+#include "lib/FriedMusic/ui/widgets/StatusBar.h"
+#include "lib/FriedMusic/ui/widgets/TrackList.h"
 
 class MainWindow : public virtual StandartGlobalUser,
                    public QWidget,

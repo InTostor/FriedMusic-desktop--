@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-#include "FriedMusic/Client.hpp"
-#include "FriedMusic/Data.hpp"
-#include "FriedMusic/SoundMaker.hpp"
-#include "FriedMusic/macro.hpp"
-#include "FriedMusic/ui/MainWindow.hpp"
+#include "lib/FriedMusic/Client.hpp"
+#include "lib/FriedMusic/Data.hpp"
+#include "lib/FriedMusic/SoundMaker.hpp"
+#include "lib/FriedMusic/macro.hpp"
+#include "lib/FriedMusic/ui/MainWindow.hpp"
 
 using namespace std;
 
@@ -29,7 +29,6 @@ int main(int argc, char* argv[]) {
     app.setStyleSheet(style);
   } catch (...) {
   }
-
   MainWindow* mainWindow = new MainWindow();
   soundmaker = mainWindow->soundmaker;
 
