@@ -6,12 +6,13 @@
 #include <string>
 #include <vector>
 
+#include "SQLiteCpp/SQLiteCpp.h"
 #include "lib/FriedMusic/Data.hpp"
 #include "lib/FriedMusic/Library.hpp"
-#include "SQLiteCpp/SQLiteCpp.h"
 #include "lib/FriedMusic/StandartGlobalUser.hpp"
 // #include "lib/FriedMusic/macro.hpp"
 #include <nlohmann/json.hpp>
+
 #include "lib/FriedMusic/Client.hpp"
 
 using namespace std;
@@ -170,8 +171,10 @@ void Client::downloadTrack(vector<string> filenames) {
 };
 void Client::downloadTrack(string filename) {
   string url = getConfigValue("musicStorageUrl") + filename;
+  url = ReplaceInString(url, " ", "%20");
   string dest = getConfigValue("localMusicStoragePath") + "/" + filename;
-  downloadFile(url, dest);
+  downloadFileAsync(url, dest);
+  eventProcessor(Types::Event::FILES_UPDATED);
 };
 void Client::deleteTrack(string filename) {
   filesystem::remove(getConfigValue("localMusicStoragePath") + filename);
@@ -329,6 +332,9 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
   playlist.name = filesystem::path(source.path).filename();
 
   if (source.pathType == Types::PathType::URL) {
+    if (!isServerAccessible()){
+      return Playlist();
+    }
     searchList.push_back(getConfigValue("userdataStorageUrl") + getUsername() +
                          "/" + source.path);
     cpr::Response response;
@@ -382,6 +388,12 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
   } else {
     return Playlist();
   }
+  // set position in playlist variable (usefull when track passed without parent
+  // playlist, but you know where it came from (not exactly))
+  for (int i = 0; i < playlist.tracks.size(); i++) {
+    playlist.tracks[i].playlistTrackNumber = i;
+  }
+  reverse(playlist.tracks.begin(),playlist.tracks.end());
   return playlist;
 };
 bool Client::isTrackInPlaylist(Track track, Playlist playlist) {

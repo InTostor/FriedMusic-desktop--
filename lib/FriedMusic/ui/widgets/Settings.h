@@ -6,6 +6,7 @@
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
+
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
@@ -24,6 +25,7 @@
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
+#include "version.h"
 
 class Settings : public virtual StandartGlobalUser, public QWidget {
  public:
@@ -416,7 +418,7 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     aboutPageLabel_1->setText(
         QCoreApplication::translate("Settings", "Fried Music", nullptr));
     aboutPageLabel_2->setText(
-        QCoreApplication::translate("Settings", "Qt 5 multiplatform", nullptr));
+        QCoreApplication::translate("Settings", "Qt 5 multiplatform "GIT_BRANCH"/"GIT_COMMIT_HASH, nullptr));
     aboutPageLabel_3->setText(QCoreApplication::translate(
         "Settings", "Music player with remote/self hosted library", nullptr));
     aboutPageLabel_4->setText(QCoreApplication::translate(

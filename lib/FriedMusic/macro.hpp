@@ -34,7 +34,7 @@ inline std::string join(const T& v, const std::string& delim) {
     }
     return s.str();
 }
-inline std::string getConfigValue(const std::string &key) {
+static inline std::string getConfigValue(const std::string &key) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
     // harakiri or try to get something

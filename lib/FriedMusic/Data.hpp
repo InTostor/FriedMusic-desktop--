@@ -105,9 +105,12 @@ struct Track {
   std::string album = "";
   std::string artists = "";
   std::string genre = "";
-  std::string filename = ""; //unique global track identifier
+  std::string filename = "";  // unique global track identifier
 
   int albumTrackNumber = -1;
+  // usefull when you know playlist that contain
+  // track, but have no exact structure
+  int playlistTrackNumber = -1;
   int year = -1;
   int duration = -1;
 

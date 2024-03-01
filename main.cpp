@@ -6,11 +6,12 @@
 #include <string>
 #include <vector>
 
-#include "lib/FriedMusic/Client.hpp"
-#include "lib/FriedMusic/Data.hpp"
-#include "lib/FriedMusic/SoundMaker.hpp"
-#include "lib/FriedMusic/macro.hpp"
-#include "lib/FriedMusic/ui/MainWindow.hpp"
+#include "Client.hpp"
+#include "Data.hpp"
+#include "SoundMaker.hpp"
+#include "ui/MainWindow.hpp"
+#include "macro.hpp"
+
 
 using namespace std;
 
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
   mainWindow->setupUi();
   client->authenticate("InTostor", "Cummunism");
   // client->downloadDatabase();
-
+  
   Source plSource("./userdata/history.fpl", Types::StorageType::LOCAL,
                   Types::PathType::FILESYSTEMPATH, Types::DataType::PLAYLIST);
   Playlist pl = client->getPlaylistFromSource(plSource, true);

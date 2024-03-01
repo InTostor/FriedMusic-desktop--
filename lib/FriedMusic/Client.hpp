@@ -11,6 +11,8 @@
 #include "Data.hpp"
 #include "StandartGlobalUser.hpp"
 
+using namespace std;
+
 class Client : public StandartGlobalCaller {
  private:
   bool _authenticated;

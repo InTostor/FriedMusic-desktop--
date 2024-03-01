@@ -22,12 +22,13 @@
 #include <QVariant>
 #include <QWidget>
 #include <iostream>
+#include "Library.hpp"
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
 
 class Player : public virtual StandartGlobalUser, public QWidget {
- public:
+public:
   QHBoxLayout *horizontalLayout;
   QVBoxLayout *playerMainControlsLayout;
   QLabel *infoTrack;
@@ -46,6 +47,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
   QComboBox *loopComboBox;
   QPushButton *shuffleButton;
   QPushButton *addToFavouriteButton;
+  QPushButton *downloadButton;
   QPushButton *addToPlaylistButton;
   QVBoxLayout *volumeLayout;
   QSlider *volumeSlider;
@@ -194,7 +196,13 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     addToFavouriteButton->setMinimumSize(QSize(35, 35));
     addToFavouriteButton->setMaximumSize(QSize(35, 35));
 
+    downloadButton = new QPushButton(this);
+    downloadButton->setObjectName(QString::fromUtf8("downloadButton"));
+    downloadButton->setMinimumSize(QSize(35, 35));
+    downloadButton->setMaximumSize(QSize(35, 35));
+
     auxButtonLayout->addWidget(addToFavouriteButton);
+    auxButtonLayout->addWidget(downloadButton);
 
     addToPlaylistButton = new QPushButton(this);
     addToPlaylistButton->setObjectName(
@@ -268,7 +276,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
     retranslateUi();
 
     QMetaObject::connectSlotsByName(this);
-  }  // setupUi
+  } // setupUi
 
   void retranslateUi() {
     this->setWindowTitle(QCoreApplication::translate("Form", "Form", nullptr));
@@ -303,7 +311,7 @@ class Player : public virtual StandartGlobalUser, public QWidget {
         "class", QVariant(QCoreApplication::translate(
                      "Form", "squareButtonSmall", nullptr)));
     volumeLabel->setText(QCoreApplication::translate("Form", "100%", nullptr));
-  }  // retranslateUi
+  } // retranslateUi
 
   Player() {}
   void onMediaPlayerMediaChanged() {
@@ -358,38 +366,60 @@ class Player : public virtual StandartGlobalUser, public QWidget {
   void onLoopComboboxSelected() {
     soundmaker->setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
   }
+  void onFilesUpdated() {
+    Source favourite = Library::getPlaylistSource("favourite.fpl");
+    Playlist favouritePlaylist = client->getPlaylistFromSource(favourite);
+    Track currentTrack = soundmaker->getTrack();
+    if (client->isTrackInPlaylist(currentTrack, favourite)) {
+      addToFavouriteButton->setIcon(
+          QIcon(QString::fromStdString(Icons::UNFAVOURITE)));
+    } else {
+      addToFavouriteButton->setIcon(
+          QIcon(QString::fromStdString(Icons::TOFAVOURITE)));
+    }
+    if (client->isTrackDownloaded(currentTrack)) {
+      downloadButton->setIcon(QIcon(QString::fromStdString(Icons::DELETE)));
+    } else {
+      downloadButton->setIcon(QIcon(QString::fromStdString(Icons::DOWNLOAD)));
+    }
+  }
   void eventProcessor(const Types::Event &event) {
     switch (event) {
-      case Types::Event::onMediaPlayerMediaChanged:
-        onMediaPlayerMediaChanged();
-        break;
-      case Types::Event::onMediaPlayerPositionChanged:
-        onMediaPlayerPositionChanged();
-        break;
-      case Types::Event::onMediaPlayerPlaying:
-        onMediaPlayerPlaying();
-        break;
-      case Types::Event::onMediaPlayerPaused:
-        onMediaPlayerPaused();
-        break;
-      case Types::Event::onMediaPlayerStopped:
-        onMediaPlayerPaused();
-        break;
-      case Types::Event::onMediaPlayerMediaFinished:
+    case Types::Event::onMediaPlayerMediaChanged:
+      onMediaPlayerMediaChanged();
+      onFilesUpdated();
+      break;
+    case Types::Event::onMediaPlayerPositionChanged:
+      onMediaPlayerPositionChanged();
+      break;
+    case Types::Event::onMediaPlayerPlaying:
+      onMediaPlayerPlaying();
+      break;
+    case Types::Event::onMediaPlayerPaused:
+      onMediaPlayerPaused();
+      break;
+    case Types::Event::onMediaPlayerStopped:
+      onMediaPlayerPaused();
+      break;
+    case Types::Event::onMediaPlayerMediaFinished:
 
-        if (soundmaker->getIsPlaying()) {
-          playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
-        } else {
-          playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
-        }
-        break;
-      case Types::Event::onMediaPlayerLoopModeChanged:
-        loopComboBox->setCurrentText(loopModesQEnum->key(soundmaker->getLoopMode()));
-        break;
-      default:
-        break;
+      if (soundmaker->getIsPlaying()) {
+        playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
+      } else {
+        playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
+      }
+      break;
+    case Types::Event::onMediaPlayerLoopModeChanged:
+      loopComboBox->setCurrentText(
+          loopModesQEnum->key(soundmaker->getLoopMode()));
+      break;
+    case Types::Event::FILES_UPDATED:
+    onFilesUpdated();
+    break;
+    default:
+      break;
     }
   }
 };
 
-#endif  // PLAYERWIDGET_H
+#endif // PLAYERWIDGET_H
