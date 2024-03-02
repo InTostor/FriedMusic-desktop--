@@ -82,7 +82,7 @@ public:
     } else {
       favouritePlaylist.tracks.push_back(_track);
     }
-    Library::savePlaylistLocally(favouritePlaylist);
+    Library::savePlaylistLocally(favouritePlaylist,client);
     close();
   }
 };

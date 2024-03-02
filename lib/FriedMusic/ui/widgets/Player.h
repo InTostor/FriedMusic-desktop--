@@ -9,6 +9,7 @@
 #ifndef PLAYERWIDGET_H
 #define PLAYERWIDGET_H
 
+#include "Library.hpp"
 #include <QApplication>
 #include <QAudio>
 #include <QComboBox>
@@ -22,7 +23,6 @@
 #include <QVariant>
 #include <QWidget>
 #include <iostream>
-#include "Library.hpp"
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
@@ -270,6 +270,8 @@ public:
                            &Player::onToFavouritePressed);
     this->QWidget::connect(addToPlaylistButton, &QPushButton::pressed, this,
                            &Player::onToPlaylistPressed);
+    this->QWidget::connect(downloadButton, &QPushButton::pressed, this,
+                           &Player::onDownloadPressed);
     this->QWidget::connect(loopComboBox, &QComboBox::currentTextChanged, this,
                            &Player::onLoopComboboxSelected);
 
@@ -361,7 +363,30 @@ public:
     volumeLabel->setText(QString::fromStdString(txt));
   }
   void onShufflePressed() {}
-  void onToFavouritePressed() {}
+  void onToFavouritePressed() {
+    Track currentTrack = soundmaker->getTrack();
+    Source favourite = Library::getPlaylistSource("favourite.fpl");
+    Playlist favouritePlaylist = client->getPlaylistFromSource(favourite);
+    if (client->isTrackInPlaylist(currentTrack, favourite)) {
+      vector<Track>::iterator it = std::find_if(
+          favouritePlaylist.tracks.begin(), favouritePlaylist.tracks.end(),
+          [&](Track const &t) { return t.filename == currentTrack.filename; });
+      favouritePlaylist.tracks.erase(it);
+    } else {
+      favouritePlaylist.tracks.push_back(currentTrack);
+    }
+    Library::savePlaylistLocally(favouritePlaylist,client);
+  }
+  void onDownloadPressed(){
+    Track currentTrack = soundmaker->getTrack();
+    Types::StorageType existence = Library::isSourceExists(currentTrack.source);
+    if (existence == Types::StorageType::LOCAL ||
+        existence == Types::StorageType::ANY) {
+      Library::deleteTrack(currentTrack);
+    } else {
+      client->downloadTrack(currentTrack.filename);
+    }
+  }
   void onToPlaylistPressed() {}
   void onLoopComboboxSelected() {
     soundmaker->setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
@@ -414,8 +439,8 @@ public:
           loopModesQEnum->key(soundmaker->getLoopMode()));
       break;
     case Types::Event::FILES_UPDATED:
-    onFilesUpdated();
-    break;
+      onFilesUpdated();
+      break;
     default:
       break;
     }

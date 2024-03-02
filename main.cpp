@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
   Source plSource("./userdata/history.fpl", Types::StorageType::LOCAL,
                   Types::PathType::FILESYSTEMPATH, Types::DataType::PLAYLIST);
   Playlist pl = client->getPlaylistFromSource(plSource, true);
+  return 0;
 
   soundmaker->setPlaylist(pl);
   

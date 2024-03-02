@@ -105,5 +105,6 @@
   },
   "cmake.configureOnOpen": false,
   "C_Cpp.errorSquiggles": "enabled",
-  "C_Cpp.clang_format_fallbackStyle":"Google"
+  "C_Cpp.clang_format_fallbackStyle":"Google",
+  
 }

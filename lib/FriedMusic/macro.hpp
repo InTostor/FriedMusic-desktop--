@@ -154,3 +154,4 @@ inline msec_t time_ms(void)
 #endif
 
 #endif
+#define timestamp std::cout <<__LINE__ << ";"<<__FILE__<<";"<<time_ms() << std::endl;

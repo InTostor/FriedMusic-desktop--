@@ -56,25 +56,24 @@ void Client::downloadDatabase() {
     // if API available, there is no sense to check it twice
 
     json values = json::parse(cpr::Get(cpr::Url(url), cookies).text);
-    string sqlCreate =
-        "CREATE TABLE `fullmeta` "
-        "( `id` int NOT NULL,`filename` varchar(256) "
-        "DEFAULT NULL,`title` varchar(256) DEFAULT NULL,"
-        "`duration` int DEFAULT NULL,"
-        "`album` varchar(256) DEFAULT NULL,"
-        "`tracknumber` int DEFAULT NULL,"
-        "`genre` varchar(45) NOT NULL,"
-        "`artist` varchar(256) DEFAULT NULL,"
-        "`year` int DEFAULT NULL,"
-        "`filesize` int DEFAULT NULL) ";
+    string sqlCreate = "CREATE TABLE `fullmeta` "
+                       "( `id` int NOT NULL,`filename` varchar(256) "
+                       "DEFAULT NULL,`title` varchar(256) DEFAULT NULL,"
+                       "`duration` int DEFAULT NULL,"
+                       "`album` varchar(256) DEFAULT NULL,"
+                       "`tracknumber` int DEFAULT NULL,"
+                       "`genre` varchar(45) NOT NULL,"
+                       "`artist` varchar(256) DEFAULT NULL,"
+                       "`year` int DEFAULT NULL,"
+                       "`filesize` int DEFAULT NULL) ";
 
     json data = json::parse(dataResponse.text);
 
     SQLite::Database db(getConfigValue("databasePath"),
                         SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
-    db.exec("DROP TABLE IF EXISTS fullmeta");  // purge all data, because
-                                               // server is more authoritative
+    db.exec("DROP TABLE IF EXISTS fullmeta"); // purge all data, because
+                                              // server is more authoritative
     db.exec(sqlCreate);
 
     string sqlInsert = "INSERT INTO `fullmeta` VALUES(";
@@ -83,7 +82,7 @@ void Client::downloadDatabase() {
 
     // generate sql
     for (json::iterator it = data.begin(); it != data.end(); ++it) {
-      for (auto& [key, value] : it->items()) {
+      for (auto &[key, value] : it->items()) {
         if (!firstPass) {
           sqlInsert += "?,";
         } else {
@@ -101,7 +100,7 @@ void Client::downloadDatabase() {
     for (json::iterator it = data.begin(); it != data.end(); ++it) {
       SQLite::Statement insertStatement(db, sqlInsert);
       valueIndex = 0;
-      for (auto& [key, value] : it->items()) {
+      for (auto &[key, value] : it->items()) {
         valueIndex += 1;
         if (value.is_null()) {
           insertStatement.bind(valueIndex, "");
@@ -142,15 +141,15 @@ void Client::pullRemote() {
         filesystem::create_directory(
             getConfigValue("localUserdataStoragePath"));
       }
-      downloadFileAsync(
-          getConfigValue("userdataStorageUrl") + "/" + username + "/" +
-              filename,
-          getConfigValue("localUserdataStoragePath") + "/" + filename);
+      downloadFileAsync(getConfigValue("userdataStorageUrl") + "/" + username +
+                            "/" + filename,
+                        getConfigValue("localUserdataStoragePath") + "/" +
+                            filename);
     }
   }
 };
 void Client::pushRemote() {
-  for (filesystem::directory_entry const& dir_entry :
+  for (filesystem::directory_entry const &dir_entry :
        filesystem::directory_iterator(
            getConfigValue("localUserdataStoragePath"))) {
     if (dir_entry.path() == "." || dir_entry.path() == ".." ||
@@ -183,7 +182,7 @@ Client::Client(){};
 // vector<string> Client::getTracksList(Types::StorageType where){};
 vector<string> Client::getPlaylistFiles(Types::StorageType where) {
   vector<string> temp;
-  for (const auto& entry : filesystem::directory_iterator(getConfigValue(""))) {
+  for (const auto &entry : filesystem::directory_iterator(getConfigValue(""))) {
     if (entry.path() == "." || entry.path() == ".." ||
         !(filesystem::path(entry.path()).extension() == ".fpl")) {
       continue;
@@ -214,21 +213,20 @@ Source Client::lookupTrack(string filename) {
 
   return source;
 }
-void Client::assembleTrack(Track* track) {
+void Client::assembleTrack(Track *track) {
   SQLite::Database db(getConfigValue("databasePath"));
   SQLite::Statement query(
-      db,
-      "SELECT title, album, tracknumber, genre, year, duration, artist "
-      "FROM fullmeta WHERE filename = ?");
+      db, "SELECT title, album, tracknumber, genre, year, duration, artist "
+          "FROM fullmeta WHERE filename = ?");
   query.bind(1, track->filename);
   while (query.executeStep()) {
-    const char* title;
-    const char* album;
-    const char* genre;
+    const char *title;
+    const char *album;
+    const char *genre;
     int albumTrackNumber;
     int year;
     int duration;
-    const char* artists;
+    const char *artists;
     title = query.getColumn(0);
     album = query.getColumn(1);
     genre = query.getColumn(3);
@@ -254,7 +252,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
   //   assembleTrack(tracks[i]);
   // }
   // Handle big lists with sql query size limit
-  if (distance(tracks.begin(), tracks.end()) > 500) {
+  timestamp if (distance(tracks.begin(), tracks.end()) > 500) {
     vector<Track> left = sliceVector(tracks, 0, 499);
     vector<Track> right = sliceVector(tracks, 500, tracks.size() - 1);
     left = assembleTracks(left);
@@ -269,6 +267,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
   vector<string> zeros;
   vector<string> filenames;
   for (int i = 0; i < tracks.size(); i++) {
+
     zeros.push_back("?");
     filenames.push_back(tracks[i].filename);
   }
@@ -283,14 +282,14 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
   }
   int i = 0;
   while (query.executeStep()) {
-    const char* filename;
-    const char* title;
-    const char* album;
-    const char* genre;
+    const char *filename;
+    const char *title;
+    const char *album;
+    const char *genre;
     int albumTrackNumber;
     int year;
     int duration;
-    const char* artists;
+    const char *artists;
     title = query.getColumn(0);
     album = query.getColumn(1);
     genre = query.getColumn(3);
@@ -302,7 +301,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
 
     vector<Track>::iterator it =
         std::find_if(tracks.begin(), tracks.end(),
-                     [&](Track const& t) { return t.filename == filename; });
+                     [&](Track const &t) { return t.filename == filename; });
     while (it != tracks.end()) {
       if ((*it).filename == filename) {
         int trackIndexFound = it - tracks.begin();
@@ -324,6 +323,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
 };
 
 Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
+
   bool found = false;
   Playlist playlist;
   playlist.tracks = {};
@@ -332,7 +332,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
   playlist.name = filesystem::path(source.path).filename();
 
   if (source.pathType == Types::PathType::URL) {
-    if (!isServerAccessible()){
+    if (!isServerAccessible()) {
       return Playlist();
     }
     searchList.push_back(getConfigValue("userdataStorageUrl") + getUsername() +
@@ -363,15 +363,20 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
       }
     }
   } else if (source.pathType == Types::PathType::FILESYSTEMPATH) {
-    ifstream file(source.path);
+    timestamp ifstream file;
+    file.open(source.path);
+    // file.open(source.path, ios::binary);
     if (!file.is_open()) {
       Playlist playlist;
-      return playlist;  // handle it somehow
+      return playlist; // handle it somehow
     } else {
+      file.seekg(0, ios::end);
+      long fileLength = file.tellg();
+      file.seekg(0, ios::beg);
       string filename;
 
       while (std::getline(file, filename)) {
-        Track track;
+        timestamp Track track;
         track.filename = filename;
         track.source = lookupTrack(filename);
         // if (assemble) {
@@ -393,8 +398,8 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
   for (int i = 0; i < playlist.tracks.size(); i++) {
     playlist.tracks[i].playlistTrackNumber = i;
   }
-  reverse(playlist.tracks.begin(),playlist.tracks.end());
-  return playlist;
+  reverse(playlist.tracks.begin(), playlist.tracks.end());
+  timestamp return playlist;
 };
 bool Client::isTrackInPlaylist(Track track, Playlist playlist) {
   for (Track _track : playlist.tracks) {

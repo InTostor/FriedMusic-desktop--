@@ -103,7 +103,7 @@ public:
                        track.filename);
   }
 
-  static inline void savePlaylistLocally(Playlist playlist) {
+  static inline void savePlaylistLocally(Playlist playlist, StandartGlobalCaller *eventEmitter = nullptr) {
     ofstream file;
     string path = getConfigValue("localUserdataStoragePath") + playlist.name;
     file.open(path, ios::out);
@@ -115,6 +115,9 @@ public:
       }
     }
     file.close();
+    if (eventEmitter != nullptr){
+      eventEmitter->eventProcessor(Types::Event::FILES_UPDATED);
+    }
   }
 
   // struct fuzzySearchOutput {
