@@ -363,19 +363,29 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
       }
     }
   } else if (source.pathType == Types::PathType::FILESYSTEMPATH) {
+    // Optimization from https://stackoverflow.com/a/29949955/18676036 (before:786msec after:)
     timestamp ifstream file;
-    file.open(source.path);
-    // file.open(source.path, ios::binary);
+    // file.open(source.path);
+    file.open(source.path.c_str(), ios::binary);
     if (!file.is_open()) {
       Playlist playlist;
       return playlist; // handle it somehow
     } else {
+      // prepare raw data
+      string raw_data;
       file.seekg(0, ios::end);
       long fileLength = file.tellg();
       file.seekg(0, ios::beg);
+      char *buffer;
+      buffer = new char[fileLength];
+      file.read(buffer, fileLength);
+      raw_data = buffer;
+      file.close();
+      istringstream _sstr(raw_data);
+
       string filename;
 
-      while (std::getline(file, filename)) {
+      while (std::getline(_sstr, filename)) {
         timestamp Track track;
         track.filename = filename;
         track.source = lookupTrack(filename);
@@ -387,7 +397,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
       if (assemble) {
         playlist.tracks = assembleTracks(playlist.tracks);
       }
-      file.close();
+      // file.close();
     }
 
   } else {
