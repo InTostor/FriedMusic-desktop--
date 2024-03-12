@@ -317,7 +317,7 @@ public:
 
   Player() {}
   void onMediaPlayerMediaChanged() {
-    Track currentTrack = soundmaker->getTrack();
+    Track currentTrack = soundmaker.getTrack();
     try {
       infoArtist->setText(QString::fromStdString(currentTrack.artists));
       infoAlbum->setText(QString::fromStdString(currentTrack.album));
@@ -329,10 +329,10 @@ public:
   }
   void onMediaPlayerPositionChanged() {
     seekerLabel->setText(
-        QString::fromStdString(secondsToTime(soundmaker->getTime() / 1000.0)));
+        QString::fromStdString(secondsToTime(soundmaker.getTime() / 1000.0)));
     if (!seekerSlider->isSliderDown()) {
       seekerSlider->setValue(
-          (int)(seekerSlider->maximum() * soundmaker->getPosition()));
+          (int)(seekerSlider->maximum() * soundmaker.getPosition()));
     }
   }
   void onMediaPlayerPlaying() {
@@ -342,32 +342,38 @@ public:
     playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
   }
   void onPlayPressed() {
-    if (soundmaker->getIsPlaying()) {
-      soundmaker->pause();
+    if (soundmaker.getIsPlaying()) {
+      soundmaker.pause();
     } else {
-      soundmaker->play();
+      soundmaker.play();
     }
   }
-  void onNextPressed() { soundmaker->next(); }
-  void onPrevPressed() { soundmaker->previous(); }
+  void onNextPressed() { soundmaker.next(); }
+  void onPrevPressed() { soundmaker.previous(); }
   void onSeekerMoved() {
-    soundmaker->setPosition(seekerSlider->value() /
+    soundmaker.setPosition(seekerSlider->value() /
                             (float)seekerSlider->maximum());
   }
   void onVolumeMoved() {
+    // logarithmic
+    /*
     qreal logarithmicVolume = QAudio::convertVolume(
         volumeSlider->value() / qreal(100), QAudio::LinearVolumeScale,
         QAudio::LogarithmicVolumeScale);
-    soundmaker->player->setVolume((int)(logarithmicVolume * 100));
+    soundmaker.player->setVolume((int)(logarithmicVolume * 100));
+    */
+    // linear
+    soundmaker.player->setVolume(volumeSlider->value());
+
     string txt = std::to_string(volumeSlider->value()) + "%";
     volumeLabel->setText(QString::fromStdString(txt));
   }
   void onShufflePressed() {}
   void onToFavouritePressed() {
-    Track currentTrack = soundmaker->getTrack();
+    Track currentTrack = soundmaker.getTrack();
     Source favourite = Library::getPlaylistSource("favourite.fpl");
-    Playlist favouritePlaylist = client->getPlaylistFromSource(favourite);
-    if (client->isTrackInPlaylist(currentTrack, favourite)) {
+    Playlist favouritePlaylist = client.getPlaylistFromSource(favourite);
+    if (client.isTrackInPlaylist(currentTrack, favourite)) {
       vector<Track>::iterator it = std::find_if(
           favouritePlaylist.tracks.begin(), favouritePlaylist.tracks.end(),
           [&](Track const &t) { return t.filename == currentTrack.filename; });
@@ -375,34 +381,34 @@ public:
     } else {
       favouritePlaylist.tracks.push_back(currentTrack);
     }
-    Library::savePlaylistLocally(favouritePlaylist,client);
+    Library::savePlaylistLocally(favouritePlaylist);
   }
   void onDownloadPressed(){
-    Track currentTrack = soundmaker->getTrack();
+    Track currentTrack = soundmaker.getTrack();
     Types::StorageType existence = Library::isSourceExists(currentTrack.source);
     if (existence == Types::StorageType::LOCAL ||
         existence == Types::StorageType::ANY) {
       Library::deleteTrack(currentTrack);
     } else {
-      client->downloadTrack(currentTrack.filename);
+      client.downloadTrack(currentTrack.filename);
     }
   }
   void onToPlaylistPressed() {}
   void onLoopComboboxSelected() {
-    soundmaker->setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
+    soundmaker.setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
   }
   void onFilesUpdated() {
     Source favourite = Library::getPlaylistSource("favourite.fpl");
-    Playlist favouritePlaylist = client->getPlaylistFromSource(favourite);
-    Track currentTrack = soundmaker->getTrack();
-    if (client->isTrackInPlaylist(currentTrack, favourite)) {
+    Playlist favouritePlaylist = client.getPlaylistFromSource(favourite);
+    Track currentTrack = soundmaker.getTrack();
+    if (client.isTrackInPlaylist(currentTrack, favourite)) {
       addToFavouriteButton->setIcon(
           QIcon(QString::fromStdString(Icons::UNFAVOURITE)));
     } else {
       addToFavouriteButton->setIcon(
           QIcon(QString::fromStdString(Icons::TOFAVOURITE)));
     }
-    if (client->isTrackDownloaded(currentTrack)) {
+    if (client.isTrackDownloaded(currentTrack)) {
       downloadButton->setIcon(QIcon(QString::fromStdString(Icons::DELETE)));
     } else {
       downloadButton->setIcon(QIcon(QString::fromStdString(Icons::DOWNLOAD)));
@@ -428,7 +434,7 @@ public:
       break;
     case Types::Event::onMediaPlayerMediaFinished:
 
-      if (soundmaker->getIsPlaying()) {
+      if (soundmaker.getIsPlaying()) {
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
       } else {
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
@@ -436,7 +442,7 @@ public:
       break;
     case Types::Event::onMediaPlayerLoopModeChanged:
       loopComboBox->setCurrentText(
-          loopModesQEnum->key(soundmaker->getLoopMode()));
+          loopModesQEnum->key(soundmaker.getLoopMode()));
       break;
     case Types::Event::FILES_UPDATED:
       onFilesUpdated();

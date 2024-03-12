@@ -27,9 +27,11 @@
 #include "../MainWindow.hpp"
 #include "../ui.hpp"
 #include "TrackLine.h"
+#include "globals.h"
+
 
 class TrackList : public virtual StandartGlobalUser, public QWidget {
- public:
+public:
   QVBoxLayout *verticalLayout;
   QListWidget *listWidget;
   Playlist _playlist;
@@ -53,17 +55,23 @@ class TrackList : public virtual StandartGlobalUser, public QWidget {
     verticalLayout->addWidget(listWidget);
     onSoundMakerPlaylistInsert();
   };
-  void setPlaylist(Playlist playlist) {
+  void setPlaylist(Playlist playlist, bool autoAssemble = true) {
     _playlist = playlist;
-    qDeleteAll(
-        listWidget->findChildren<QWidget *>("", Qt::FindDirectChildrenOnly));
+    bool isPlaylistValid = (playlist.size()>0);
+    if (!isPlaylistValid){
+      return;
+    }
+    if (autoAssemble and !_playlist.tracks[0].isAssembled){
+      _playlist.tracks = client.assembleTracks(_playlist.tracks);
+    }
+    listWidget->clear();
+    lines = {};
     int index = 0;
     for (Track track : playlist.tracks) {
       TrackLine *trackLine = new TrackLine();
-      trackLine->setGlobals(soundmaker, client);
       trackLine->mainWindow = mainWindow;
       trackLine->setupUi();
-      trackLine->setTrack(track, index);
+      trackLine->setTrack(track, playlist, index);
       mainWindow->registerListeners(trackLine);
 
       lines.push_back(trackLine);
@@ -78,10 +86,8 @@ class TrackList : public virtual StandartGlobalUser, public QWidget {
     // this->setMinimumWidth(listWidget->sizeHintForColumn(0));
   };
   void onSoundMakerPlaylistInsert() {
-    Playlist currentPlaylist = soundmaker->getCurrentPlaylist();
-    if (&currentPlaylist) {
-      setPlaylist(currentPlaylist);
-    }
+    Playlist currentPlaylist = soundmaker.getCurrentPlaylist();
+    setPlaylist(currentPlaylist);
   }
   void onFilesUpdated() {
     Source favSource("./userdata/favourite.fpl", Types::StorageType::LOCAL,
@@ -90,22 +96,23 @@ class TrackList : public virtual StandartGlobalUser, public QWidget {
 
     for (int i = 0; i < lines.size(); i++) {
       // update each
-      bool isInFavourite = client->isTrackInPlaylist(lines[i]->track,favSource);
-      bool isDownloaded = client->isTrackDownloaded(lines[i]->track);
-      lines[i]->updateRelation(isInFavourite,isDownloaded);
+      bool isInFavourite =
+          client.isTrackInPlaylist(lines[i]->track, favSource);
+      bool isDownloaded = client.isTrackDownloaded(lines[i]->track);
+      lines[i]->updateRelation(isInFavourite, isDownloaded);
     }
   }
   void onMediaPlayerPlaying() { onSoundMakerPlaylistInsert(); }
   void eventProcessor(const Types::Event &event) {
     switch (event) {
-      case Types::Event::SOUNDMAKER_PLAYLIST_SET:
-        onSoundMakerPlaylistInsert();
-        break;
-      case Types::Event::FILES_UPDATED:
-        onFilesUpdated();
-        break;
-      default:
-        break;
+    case Types::Event::SOUNDMAKER_PLAYLIST_SET:
+      onSoundMakerPlaylistInsert();
+      break;
+    case Types::Event::FILES_UPDATED:
+      onFilesUpdated();
+      break;
+    default:
+      break;
     }
   }
 };

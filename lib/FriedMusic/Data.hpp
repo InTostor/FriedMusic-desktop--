@@ -61,6 +61,13 @@ enum Event {
   onMediaPlayerAudioVolume,
   onMediaPlayerAudioDevice
 };
+enum class ErrorCode{
+  AUTHENTICATION_FAILED,
+  API_SERVER_CONNECTION_FAILED,
+  USERDATA_SERVER_CONNECTION_FAILED,
+  STORAGE_SERVER_CONNECTION_FAILED,
+};
+
 };  // namespace Types
 
 class Source {
@@ -114,12 +121,17 @@ struct Track {
   int year = -1;
   int duration = -1;
 
-  bool isAssembled;
+  bool isAssembled = false;
   Source source;
+  Track(){};
+  Track(Source initialSource){
+    source=initialSource;
+    filename = std::filesystem::path(source.path).filename();
+    }
 };
 
 struct Playlist {
-  vector<Track> tracks;
+  vector<Track> tracks = {};
   std::string name = "";
   bool isDynamic = false;
   int size() { return distance(tracks.begin(), tracks.end()); }

@@ -1,6 +1,7 @@
 #ifndef TRACKLINE_H
 #define TRACKLINE_H
 
+#include "globals.h"
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -16,6 +17,8 @@
 #include "../../macro.hpp"
 #include "../ui.hpp"
 #include "Modals.h"
+
+
 
 using namespace std;
 
@@ -40,6 +43,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
 
   int indexInPlaylist = -1;
   Track track;
+  Playlist parentPlaylist;
   bool setup = false;
 
   void setupUi() {
@@ -200,38 +204,43 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     extraButton->setText(QString());
   }  // retranslateUi
 
-  void setTrack(Track _track, int index = -1) {
+  void setTrack(Track _track, Playlist _playlist, int index = -1) {
     indexInPlaylist = index;
     track = _track;
+    parentPlaylist = _playlist;
     titleLabel->setText(QString::fromStdString(track.title));
     albumLabel->setText(QString::fromStdString(track.album));
     artistsLabel->setText(QString::fromStdString(track.artists));
     filenameLabel->setText(QString::fromStdString(track.filename));
     durationLabel->setText(
         QString::fromStdString(secondsToTime(track.duration)));
-    if (soundmaker->getTrack().filename == track.filename and
-        soundmaker->getIsPlaying()) {
+    if (soundmaker.getTrack().filename == track.filename and
+        soundmaker.getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
     }
   }
   void onPlayPressed() {
-    if (soundmaker->getTrack().filename == track.filename) {
-      if (soundmaker->getIsPlaying()) {
-        soundmaker->pause();
+    if (soundmaker.getCurrentPlaylist().name != parentPlaylist.name){
+      soundmaker.setPlaylist(parentPlaylist,indexInPlaylist);
+      soundmaker.play();
+      return;
+    }
+    if (soundmaker.getTrack().filename == track.filename) {
+      if (soundmaker.getIsPlaying()) {
+        soundmaker.pause();
       } else {
-        soundmaker->play();
+        soundmaker.play();
       }
 
     } else {
-      soundmaker->setCurrentIndex(indexInPlaylist);
-      soundmaker->play();
+      soundmaker.setCurrentIndex(indexInPlaylist);
+      soundmaker.play();
     }
   }
   void onExtraPressed() {
     TrackActionsModal *modal = new TrackActionsModal();
-    modal->setGlobals(soundmaker, client);
     modal->setup(track);
     QPoint globalCursorPos = QCursor::pos();
     modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
@@ -251,8 +260,8 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
   void eventProcessor(const Types::Event &event) {
     switch (event) {
       case Types::Event::onMediaPlayerMediaChanged:
-        if (soundmaker->getTrack().filename == track.filename and
-            soundmaker->getIsPlaying()) {
+        if (soundmaker.getTrack().filename == track.filename and
+            soundmaker.getIsPlaying()) {
           playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
         } else {
           playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));

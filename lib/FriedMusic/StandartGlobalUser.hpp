@@ -1,10 +1,13 @@
 #pragma once
-#include <QObject>
+// #include <QObject>
 #include <QWidget>
+#include <QtConcurrent>
 #include <iostream>
+#include <qobject.h>
 #include <vector>
 
 #include "Data.hpp"
+// #include "globals.h"
 
 using namespace std;
 
@@ -13,35 +16,32 @@ class Client;
 class MainWindow;
 class StandartGlobalCaller;
 class StandartGlobalUser {
- public:
-  Client *client;
-  SoundMaker *soundmaker;
+public:
   StandartGlobalCaller *mainWindow;
-
   virtual void eventProcessor(const Types::Event &event) {}
 
-  void setGlobals(SoundMaker *sm, Client *cl) {
-    soundmaker = sm;
-    client = cl;
-  }
   virtual ~StandartGlobalUser() = default;
 };
 
 /// @brief Calls methods on stored listeners. Callbacks
 class StandartGlobalCaller {
- protected:
+protected:
   vector<StandartGlobalUser *> listeners;
   vector<StandartGlobalCaller *> callerListeners;
 
- public:
+public:
   void registerListeners(StandartGlobalUser *object) {
-    listeners.push_back(object);
+    // cout << "register: " << object << endl;
+    if (std::find(listeners.begin(), listeners.end(), object) ==
+        listeners.end()) {
+      listeners.push_back(object);
+    }
   };
   void registerListeners(vector<StandartGlobalUser *> objects) {
-    listeners.insert(std::end(listeners), std::begin(objects),
-                     std::end(objects));
+    listeners.insert(end(listeners), begin(objects), end(objects));
   };
   void unregisterListener(StandartGlobalUser *object) {
+    // cout << "unregister: " << object << endl;
     vector<StandartGlobalUser *>::iterator toErase;
     toErase = find(listeners.begin(), listeners.end(), object);
     listeners.erase(toErase);
@@ -51,108 +51,35 @@ class StandartGlobalCaller {
     callerListeners.push_back(object);
   };
   void registerCallerListeners(vector<StandartGlobalCaller *> objects) {
-    callerListeners.insert(std::end(callerListeners), std::begin(objects),
-                           std::end(objects));
+    callerListeners.insert(end(callerListeners), begin(objects), end(objects));
   };
   void unregisterCallerListener(StandartGlobalCaller *object) {
     vector<StandartGlobalCaller *>::iterator toErase;
     toErase = find(callerListeners.begin(), callerListeners.end(), object);
     callerListeners.erase(toErase);
   }
-  virtual void eventProcessor(const Types::Event &event){
+  void eventProcessor(const Types::Event &event, bool async = false) {
+
     for (StandartGlobalUser *listener : listeners) {
-      listener->eventProcessor(event);
+      // !HEISENBUG! sometimes there is a phantom address, which is not in the
+      // !listeners array. This will cause SIGSEGV
+      if (listener and std::find(listeners.begin(), listeners.end(),
+                                 listener) != listeners.end()) {
+        // cout << "event: " << listener << endl;
+        if (async) {
+          QtConcurrent::run(listener, &StandartGlobalUser::eventProcessor,
+                            event);
+
+        } else {
+          listener->eventProcessor(event);
+        }
+      }
     }
     for (StandartGlobalCaller *listener : callerListeners) {
-      listener->eventProcessor(event);
+      if (listener and std::find(callerListeners.begin(), callerListeners.end(),
+                                 listener) != callerListeners.end()) {
+        listener->eventProcessor(event);
+      }
     }
   }
-
-  // virtual void eventProcessor(const Types::Event &event) {
-  //   for (StandartGlobalUser *listener : listeners) {
-  //     switch (event) {
-  //       case Types::Event::AUTHENTICATION_TRYED:
-  //         listener->onAuthenticationTryed();
-  //         break;
-  //       case Types::Event::FILES_UPDATED:
-  //         listener->onFilesUpdated();
-  //         break;
-  //       case Types::Event::SOUNDMAKER_PLAYLIST_SET:
-  //         listener->onSoundMakerPlaylistInsert();
-  //         break;
-  //       case Types::Event::onMediaPlayerMediaChanged:
-  //         listener->onMediaPlayerMediaChanged();
-  //         break;
-  //       case Types::Event::onMediaPlayerNothingSpecial:
-  //         listener->onMediaPlayerNothingSpecial();
-  //         break;
-  //       case Types::Event::onMediaPlayerOpening:
-  //         listener->onMediaPlayerOpening();
-  //         break;
-  //       case Types::Event::onMediaPlayerBuffering:
-  //         listener->onMediaPlayerBuffering();
-  //         break;
-  //       case Types::Event::onMediaPlayerPlaying:
-  //         listener->onMediaPlayerPlaying();
-  //         break;
-  //       case Types::Event::onMediaPlayerPaused:
-  //         listener->onMediaPlayerPaused();
-  //         break;
-  //       case Types::Event::onMediaPlayerStopped:
-  //         listener->onMediaPlayerStopped();
-  //         break;
-  //       case Types::Event::onMediaPlayerForward:
-  //         listener->onMediaPlayerForward();
-  //         break;
-  //       case Types::Event::onMediaPlayerBackward:
-  //         listener->onMediaPlayerBackward();
-  //         break;
-  //       case Types::Event::onMediaPlayerEncounteredError:
-  //         listener->onMediaPlayerEncounteredError();
-  //         break;
-  //       case Types::Event::onMediaPlayerTimeChanged:
-  //         listener->onMediaPlayerTimeChanged();
-  //         break;
-  //       case Types::Event::onMediaPlayerPositionChanged:
-  //         listener->onMediaPlayerPositionChanged();
-  //         break;
-  //       case Types::Event::onMediaPlayerLengthChanged:
-  //         listener->onMediaPlayerLengthChanged();
-  //         break;
-  //       case Types::Event::onMediaPlayerVout:
-  //         listener->onMediaPlayerVout();
-  //         break;
-  //       case Types::Event::onMediaPlayerESAdded:
-  //         listener->onMediaPlayerESAdded();
-  //         break;
-  //       case Types::Event::onMediaPlayerESDeleted:
-  //         listener->onMediaPlayerESDeleted();
-  //         break;
-  //       case Types::Event::onMediaPlayerESSelected:
-  //         listener->onMediaPlayerESSelected();
-  //         break;
-  //       case Types::Event::onMediaPlayerCorked:
-  //         listener->onMediaPlayerCorked();
-  //         break;
-  //       case Types::Event::onMediaPlayerUncorked:
-  //         listener->onMediaPlayerUncorked();
-  //         break;
-  //       case Types::Event::onMediaPlayerMuted:
-  //         listener->onMediaPlayerMuted();
-  //         break;
-  //       case Types::Event::onMediaPlayerUnmuted:
-  //         listener->onMediaPlayerUnmuted();
-  //         break;
-  //       case Types::Event::onMediaPlayerAudioVolume:
-  //         listener->onMediaPlayerAudioVolume();
-  //         break;
-  //       case Types::Event::onMediaPlayerAudioDevice:
-  //         listener->onMediaPlayerAudioDevice();
-  //         break;
-  //     }
-  //   }
-  //   for (StandartGlobalCaller *callerListener : callerListeners) {
-  //     callerListener->eventProcessor(event);
-  //   }
-  // }
 };

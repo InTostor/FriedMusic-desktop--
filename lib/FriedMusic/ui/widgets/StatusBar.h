@@ -24,6 +24,8 @@ using namespace std;
 #include "../../macro.hpp"
 #include "../ui.hpp"
 #include "Settings.h"
+#include "globals.h"
+
 
 class StatusBar : public virtual StandartGlobalUser, public QWidget {
  public:
@@ -79,19 +81,20 @@ class StatusBar : public virtual StandartGlobalUser, public QWidget {
   StatusBar() {}
 
   void onSettingsOpen() {
+    delete settingsMenu;
     settingsMenu = new Settings();
-    settingsMenu->setGlobals(this->soundmaker, this->client);
+    // settingsMenu->setGlobals(this->soundmaker, this->client);
     settingsMenu->setupUi();
     settingsMenu->show();
   }
   void onAuthenticationTryed() {
-    if (!client->isServerAccessible()) {
+    if (!client.isServerAccessible()) {
       loggedAsLabel->setText(
           QString::fromUtf8("Offline, server is not accessible"));
       return;
     }
-    string username = client->getUsername();
-    if (username == "anonymous" & client->isServerAccessible()) {
+    string username = client.getUsername();
+    if (username == "anonymous" & client.isServerAccessible()) {
       loggedAsLabel->setText(QString::fromUtf8(
           "Logged as anonymous, but network available. Check credentials"));
     } else {

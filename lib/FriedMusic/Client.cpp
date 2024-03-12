@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "SQLiteCpp/SQLiteCpp.h"
+
 #include "lib/FriedMusic/Data.hpp"
 #include "lib/FriedMusic/Library.hpp"
 #include "lib/FriedMusic/StandartGlobalUser.hpp"
@@ -56,7 +57,7 @@ void Client::downloadDatabase() {
     // if API available, there is no sense to check it twice
 
     json values = json::parse(cpr::Get(cpr::Url(url), cookies).text);
-    string sqlCreate = "CREATE TABLE `fullmeta` "
+    string sqlCreate = "CREATE TABLE `fullmeta`"
                        "( `id` int NOT NULL,`filename` varchar(256) "
                        "DEFAULT NULL,`title` varchar(256) DEFAULT NULL,"
                        "`duration` int DEFAULT NULL,"
@@ -213,12 +214,22 @@ Source Client::lookupTrack(string filename) {
 
   return source;
 }
-void Client::assembleTrack(Track *track) {
+vector<Source> Client::lookupTrack(vector<string> filenames) {
+  vector<Source> out;
+  for (string filename : filenames) {
+    out.push_back(lookupTrack(filename));
+  }
+  return out;
+}
+
+// mutates track
+Track Client::assembleTrack(Track track) {
+  // cout << track->filename << endl;
   SQLite::Database db(getConfigValue("databasePath"));
   SQLite::Statement query(
       db, "SELECT title, album, tracknumber, genre, year, duration, artist "
           "FROM fullmeta WHERE filename = ?");
-  query.bind(1, track->filename);
+  query.bind(1, track.filename);
   while (query.executeStep()) {
     const char *title;
     const char *album;
@@ -234,16 +245,17 @@ void Client::assembleTrack(Track *track) {
     year = query.getColumn(4);
     duration = query.getColumn(5);
     artists = query.getColumn(6);
-    track->title = title;
-    track->album = album;
-    track->albumTrackNumber = albumTrackNumber;
-    track->genre = genre;
-    track->year = year;
-    track->duration = duration;
-    track->artists = artists;
-    track->isAssembled = true;
+    track.title = title;
+    track.album = album;
+    track.albumTrackNumber = albumTrackNumber;
+    track.genre = genre;
+    track.year = year;
+    track.duration = duration;
+    track.artists = artists;
+    track.isAssembled = true;
     break;
   }
+  return track;
 };
 
 vector<Track> Client::assembleTracks(vector<Track> tracks) {
@@ -252,7 +264,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
   //   assembleTrack(tracks[i]);
   // }
   // Handle big lists with sql query size limit
-  timestamp if (distance(tracks.begin(), tracks.end()) > 500) {
+  if (distance(tracks.begin(), tracks.end()) > 500) {
     vector<Track> left = sliceVector(tracks, 0, 499);
     vector<Track> right = sliceVector(tracks, 500, tracks.size() - 1);
     left = assembleTracks(left);
@@ -363,8 +375,9 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
       }
     }
   } else if (source.pathType == Types::PathType::FILESYSTEMPATH) {
-    // Optimization from https://stackoverflow.com/a/29949955/18676036 (before:786msec after:)
-    timestamp ifstream file;
+    // Optimization from https://stackoverflow.com/a/29949955/18676036
+    // (before:786msec after:)
+    ifstream file;
     // file.open(source.path);
     file.open(source.path.c_str(), ios::binary);
     if (!file.is_open()) {
@@ -386,7 +399,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
       string filename;
 
       while (std::getline(_sstr, filename)) {
-        timestamp Track track;
+        Track track;
         track.filename = filename;
         track.source = lookupTrack(filename);
         // if (assemble) {
@@ -409,7 +422,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
     playlist.tracks[i].playlistTrackNumber = i;
   }
   reverse(playlist.tracks.begin(), playlist.tracks.end());
-  timestamp return playlist;
+  return playlist;
 };
 bool Client::isTrackInPlaylist(Track track, Playlist playlist) {
   for (Track _track : playlist.tracks) {

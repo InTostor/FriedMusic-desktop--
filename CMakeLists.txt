@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(FriedMusic++ VERSION 0.1.0 LANGUAGES C CXX)
 # SET(CMAKE_CXX_FLAGS "-O3 -Os -mavx2 -mbmi2 -march=native -Ofast -frename-registers -fopenmp")
 
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMakeChecksCache)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -31,10 +32,10 @@ execute_process(
 
 add_definitions(-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH})
 add_definitions(-DGIT_BRANCH=${GIT_BRANCH})
-configure_file(
-  ${CMAKE_SOURCE_DIR}/lib/FriedMusic/version.h
-  ${CMAKE_BINARY_DIR}/generated/version.h
-)
+# configure_file(
+#   ${CMAKE_SOURCE_DIR}/lib/FriedMusic/version.h
+#   ${CMAKE_BINARY_DIR}/generated/version.h
+# )
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
     
@@ -80,13 +81,14 @@ dl
 )
 
 # include qt
-find_package(Qt5 REQUIRED COMPONENTS Core Gui UiTools Widgets Multimedia)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui UiTools Widgets Multimedia Concurrent)
 target_link_libraries(${PROJECT_NAME}
     Qt::Core
     Qt::Gui
     Qt::UiTools
     Qt::Widgets
     Qt::Multimedia
+    Qt::Concurrent
 )
 
 #include json

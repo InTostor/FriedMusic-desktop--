@@ -11,6 +11,7 @@
 #include "Data.hpp"
 #include "StandartGlobalUser.hpp"
 
+
 using namespace std;
 
 class Client : public StandartGlobalCaller {
@@ -36,7 +37,8 @@ class Client : public StandartGlobalCaller {
   vector<string> getPlaylistFiles(Types::StorageType where);
   vector<Source> getPlaylistsSource(Types::StorageType where);
   Source lookupTrack(string filename);
-  void assembleTrack(Track* track);
+  vector<Source> lookupTrack(vector<string> filenames);
+  Track assembleTrack(Track track);
   vector<Track> assembleTracks(vector<Track> tracks);
   Playlist getPlaylistFromSource(Source source, bool assemble = false);
   bool isTrackInPlaylist(Track track, Playlist playlist);

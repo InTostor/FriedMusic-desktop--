@@ -11,6 +11,8 @@
 #include "lib/FriedMusic/ui/widgets/Player.h"
 #include "lib/FriedMusic/ui/widgets/StatusBar.h"
 #include "lib/FriedMusic/ui/widgets/TrackList.h"
+#include "globals.h"
+
 
 class MainWindow : public virtual StandartGlobalUser,
                    public QWidget,
@@ -25,13 +27,9 @@ class MainWindow : public virtual StandartGlobalUser,
   // finder, status bar, other
   void setupUi() {
     playerWidget = new Player();
-    playerWidget->setGlobals(this->soundmaker, this->client);
     finderWidget = new Finder();
-    finderWidget->setGlobals(this->soundmaker, this->client);
     statusBarWidget = new StatusBar();
-    statusBarWidget->setGlobals(this->soundmaker, this->client);
     currentTrackListWidget = new TrackList();
-    currentTrackListWidget->setGlobals(this->soundmaker, this->client);
 
     registerListeners(playerWidget);
     registerListeners(finderWidget);
@@ -43,8 +41,8 @@ class MainWindow : public virtual StandartGlobalUser,
     statusBarWidget->mainWindow = this;
     currentTrackListWidget->mainWindow = this;
 
-    soundmaker->registerCallerListeners(this);
-    client->registerCallerListeners(this);
+    soundmaker.registerCallerListeners(this);
+    client.registerCallerListeners(this);
 
     playerWidget->setupUi();
     finderWidget->setupUi();
@@ -72,7 +70,7 @@ class MainWindow : public virtual StandartGlobalUser,
     layout->addWidget(statusBarWidget);
     layout->addWidget(horizontalSplitter);
   }
-  MainWindow() { soundmaker = new SoundMaker(); }
+  MainWindow() {  }
   void eventProcessor(const Types::Event &event) override {
     for (StandartGlobalUser *listener : listeners) {
       listener->eventProcessor(event);

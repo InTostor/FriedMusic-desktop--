@@ -1,7 +1,8 @@
-#ifndef VERSION_H
-#define VERSION_H
+#pragma once
+#ifndef GIT_BRANCH
+#define GIT_BRANCH "UNKNOWN"
+#endif
 
-#define GIT_BRANCH "@GIT_BRANCH@"
-#define GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
-
+#ifndef GIT_COMMIT_HASH
+#define GIT_COMMIT_HASH "UNKNOWN"
 #endif

@@ -1,5 +1,5 @@
 {
-  "apiUrl":"http://0.0.0.0/api/",
+  "apiUrl":"http://music.epsilon.explorers.mdomain/api/",
   "musicStorageUrl":"http://music.epsilon.explorers.mdomain/Music/",
   "userdataStorageUrl":"http://music.epsilon.explorers.mdomain/userdata/",
   "localMusicStoragePath":"Music/",

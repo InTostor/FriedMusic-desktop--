@@ -10,32 +10,49 @@
 #define FINDER_H
 
 #include <QApplication>
+#include <QCompleter>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QScrollArea>
+#include <QStandardItemModel>
 #include <QTabWidget>
+#include <QToolBox>
 #include <QVBoxLayout>
 #include <QVariant>
 #include <QWidget>
+#include <qtoolbox.h>
+
+#include "Library.hpp"
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
+#include "TrackLine.h"
+#include "PlaylistLine.h"
+#include "TrackList.h"
+#include "globals.h"
 
-class Finder : public virtual StandartGlobalUser, public QWidget{
- public:
+
+class Finder : public virtual StandartGlobalUser, public QWidget {
+public:
   QGridLayout *gridLayout;
   QTabWidget *tab;
   QWidget *searchTab;
   QVBoxLayout *verticalLayout_2;
   QLineEdit *searchLine;
-  QListWidget *searchResult;
+  QToolBox *searchResultToolbox;
+  QListWidget *searchResultArtists;
+  QListWidget *searchResultPlaylists;
+  QListWidget *searchResultTracks;
   QWidget *filesTab;
   QGridLayout *gridLayout_2;
   QScrollArea *playlistScroll;
   QWidget *playlistScrollContent;
   QHBoxLayout *horizontalLayout_3;
+
+  QStringList searchCompleteWordList;
+  QCompleter *completer;
 
   void setupUi() {
     if (this->objectName().isEmpty())
@@ -51,15 +68,34 @@ class Finder : public virtual StandartGlobalUser, public QWidget{
     searchTab->setObjectName(QString::fromUtf8("searchTab"));
     verticalLayout_2 = new QVBoxLayout(searchTab);
     verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+
+    completer = new QCompleter(searchCompleteWordList, this);
+    searchCompleteWordList << "SQL "
+                           << "HTTP://";
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setModel(new QStandardItemModel(completer));
+
     searchLine = new QLineEdit(searchTab);
     searchLine->setObjectName(QString::fromUtf8("searchLine"));
+    searchLine->setCompleter(completer);
 
     verticalLayout_2->addWidget(searchLine);
 
-    searchResult = new QListWidget(searchTab);
-    searchResult->setObjectName(QString::fromUtf8("searchResult"));
+    searchResultToolbox = new QToolBox(searchTab);
 
-    verticalLayout_2->addWidget(searchResult);
+    searchResultArtists = new QListWidget(searchTab);
+    searchResultArtists->setObjectName(QString::fromUtf8("searchResult"));
+    searchResultToolbox->addItem(searchResultArtists, "Artists");
+
+    searchResultPlaylists = new QListWidget(searchTab);
+    searchResultPlaylists->setObjectName(QString::fromUtf8("searchResult"));
+    searchResultToolbox->addItem(searchResultPlaylists, "Playlists");
+
+    searchResultTracks = new QListWidget(searchTab);
+    searchResultTracks->setObjectName(QString::fromUtf8("searchResult"));
+    searchResultToolbox->addItem(searchResultTracks, "Tracks");
+
+    verticalLayout_2->addWidget(searchResultToolbox);
 
     tab->addTab(searchTab, QString());
     filesTab = new QWidget();
@@ -87,8 +123,10 @@ class Finder : public virtual StandartGlobalUser, public QWidget{
 
     tab->setCurrentIndex(1);
 
+    connect(searchLine, &QLineEdit::editingFinished, this, &Finder::onSearch);
+
     QMetaObject::connectSlotsByName(this);
-  }  // setupUi
+  } // setupUi
 
   void retranslateUi() {
     this->setWindowTitle(
@@ -101,8 +139,70 @@ class Finder : public virtual StandartGlobalUser, public QWidget{
     tab->setTabText(
         tab->indexOf(filesTab),
         QCoreApplication::translate("Finder", "Playlists", nullptr));
-  }  // retranslateUi
+  } // retranslateUi
   Finder() {}
+  void onSearch() {
+    Library::fuzzySearchOutput searchResult =
+        Library::fuzzySearch(searchLine->text().toStdString());
+/*
+    for (Source source : searchResult.playlists) {
+      cout << "playlist: " << source.path << endl;
+    }
+    for (Source source : searchResult.tracks) {
+      cout << "track: " << source.path << endl;
+    }
+    for (string artist : searchResult.artists) {
+      cout << "artist: " << artist << endl;
+    }
+    */
+    searchResultArtists->clear();
+    searchResultPlaylists->clear();
+    searchResultTracks->clear();
+    
+    
+    qDeleteAll(searchResultArtists->findChildren<QWidget *>(
+        "", Qt::FindDirectChildrenOnly));
+    qDeleteAll(searchResultPlaylists->findChildren<QWidget *>(
+        "", Qt::FindDirectChildrenOnly));
+    qDeleteAll(searchResultTracks->findChildren<QWidget *>(
+        "", Qt::FindDirectChildrenOnly));
+        
+    // make found tracks playlist
+    Playlist generatedFromTracksPlaylist;
+    generatedFromTracksPlaylist.name = "search_"+to_string(time_ms());
+    for (Source trackSource : searchResult.tracks) {
+      Track track(trackSource);
+      track = client.assembleTrack(track);
+      generatedFromTracksPlaylist.tracks.push_back(track);
+    }
+    int index = 0;
+    for (Track track : generatedFromTracksPlaylist.tracks) {
+      TrackLine *trackLine = new TrackLine();
+      trackLine->mainWindow = mainWindow;
+      trackLine->setupUi();
+      trackLine->setTrack(track, generatedFromTracksPlaylist, index);
+      mainWindow->registerListeners(trackLine);
+
+      QListWidgetItem *widgetItem = new QListWidgetItem();
+
+      searchResultTracks->addItem(widgetItem);
+      searchResultTracks->setItemWidget(widgetItem, trackLine);
+      widgetItem->setSizeHint(trackLine->sizeHint());
+      index++;
+    }
+
+    for (Source playlistSource : searchResult.playlists){
+      PlaylistLine *playlistLine = new PlaylistLine();
+      playlistLine->mainWindow = mainWindow;
+      playlistLine->setupUi();
+      playlistLine->setPlaylist(playlistSource);
+      mainWindow->registerListeners(playlistLine);
+      QListWidgetItem *widgetItem = new QListWidgetItem();
+      searchResultPlaylists->addItem(widgetItem);
+      searchResultPlaylists->setItemWidget(widgetItem, playlistLine);
+      widgetItem->setSizeHint(playlistLine->sizeHint());
+    }
+  }
 };
 
-#endif  // FINDER_H
+#endif // FINDER_H
