@@ -204,7 +204,7 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     extraButton->setText(QString());
   }  // retranslateUi
 
-  void setTrack(Track _track, Playlist _playlist, int index = -1) {
+  void setTrack(Track &_track, Playlist &_playlist, int index = -1) {
     indexInPlaylist = index;
     track = _track;
     parentPlaylist = _playlist;

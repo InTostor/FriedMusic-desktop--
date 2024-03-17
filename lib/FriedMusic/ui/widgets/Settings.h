@@ -35,21 +35,21 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
   QFormLayout *formLayout_2;
   QLabel *label_10;
   QVBoxLayout *verticalLayout_2;
-  QLineEdit *lineEdit_7;
-  QLineEdit *lineEdit_8;
-  QPushButton *pushButton;
+  QLineEdit *lineEdit_Login;
+  QLineEdit *lineEdit_Password;
+  QPushButton *loginButton;
   QWidget *behaviourTab;
   QGridLayout *gridLayout;
   QVBoxLayout *verticalLayout_4;
   QLabel *label_8;
   QHBoxLayout *horizontalLayout_8;
   QVBoxLayout *verticalLayout_3;
-  QCheckBox *checkBox_4;
-  QCheckBox *checkBox;
+  QCheckBox *authOnStartButton;
+  QCheckBox *pullRemoteOnStartButton;
   QHBoxLayout *horizontalLayout_7;
   QLabel *label_7;
-  QCheckBox *checkBox_2;
-  QCheckBox *checkBox_3;
+  QCheckBox *pushRemoteOnCloseCheckbox;
+  QCheckBox *pushRemoteOnAnyUpdateCheckbox;
   QSpacerItem *verticalSpacer;
   QSpacerItem *horizontalSpacer;
   QWidget *pathsConf;
@@ -110,21 +110,21 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     verticalLayout_2 = new QVBoxLayout();
     verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
     verticalLayout_2->setContentsMargins(0, 0, -1, -1);
-    lineEdit_7 = new QLineEdit(accountConf);
-    lineEdit_7->setObjectName(QString::fromUtf8("lineEdit_7"));
+    lineEdit_Login = new QLineEdit(accountConf);
+    lineEdit_Login->setObjectName(QString::fromUtf8("lineEdit_7"));
 
-    verticalLayout_2->addWidget(lineEdit_7);
+    verticalLayout_2->addWidget(lineEdit_Login);
 
-    lineEdit_8 = new QLineEdit(accountConf);
-    lineEdit_8->setObjectName(QString::fromUtf8("lineEdit_8"));
-    lineEdit_8->setEchoMode(QLineEdit::Password);
+    lineEdit_Password = new QLineEdit(accountConf);
+    lineEdit_Password->setObjectName(QString::fromUtf8("lineEdit_8"));
+    lineEdit_Password->setEchoMode(QLineEdit::Password);
 
-    verticalLayout_2->addWidget(lineEdit_8);
+    verticalLayout_2->addWidget(lineEdit_Password);
 
-    pushButton = new QPushButton(accountConf);
-    pushButton->setObjectName(QString::fromUtf8("pushButton"));
+    loginButton = new QPushButton(accountConf);
+    loginButton->setObjectName(QString::fromUtf8("pushButton"));
 
-    verticalLayout_2->addWidget(pushButton);
+    verticalLayout_2->addWidget(loginButton);
 
     formLayout_2->setLayout(1, QFormLayout::LabelRole, verticalLayout_2);
 
@@ -145,15 +145,15 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
     verticalLayout_3 = new QVBoxLayout();
     verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
-    checkBox_4 = new QCheckBox(behaviourTab);
-    checkBox_4->setObjectName(QString::fromUtf8("checkBox_4"));
+    authOnStartButton = new QCheckBox(behaviourTab);
+    authOnStartButton->setObjectName(QString::fromUtf8("checkBox_4"));
 
-    verticalLayout_3->addWidget(checkBox_4);
+    verticalLayout_3->addWidget(authOnStartButton);
 
-    checkBox = new QCheckBox(behaviourTab);
-    checkBox->setObjectName(QString::fromUtf8("checkBox"));
+    pullRemoteOnStartButton = new QCheckBox(behaviourTab);
+    pullRemoteOnStartButton->setObjectName(QString::fromUtf8("checkBox"));
 
-    verticalLayout_3->addWidget(checkBox);
+    verticalLayout_3->addWidget(pullRemoteOnStartButton);
 
     horizontalLayout_7 = new QHBoxLayout();
     horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
@@ -162,15 +162,15 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_7->addWidget(label_7);
 
-    checkBox_2 = new QCheckBox(behaviourTab);
-    checkBox_2->setObjectName(QString::fromUtf8("checkBox_2"));
+    pushRemoteOnCloseCheckbox = new QCheckBox(behaviourTab);
+    pushRemoteOnCloseCheckbox->setObjectName(QString::fromUtf8("checkBox_2"));
 
-    horizontalLayout_7->addWidget(checkBox_2);
+    horizontalLayout_7->addWidget(pushRemoteOnCloseCheckbox);
 
-    checkBox_3 = new QCheckBox(behaviourTab);
-    checkBox_3->setObjectName(QString::fromUtf8("checkBox_3"));
+    pushRemoteOnAnyUpdateCheckbox = new QCheckBox(behaviourTab);
+    pushRemoteOnAnyUpdateCheckbox->setObjectName(QString::fromUtf8("checkBox_3"));
 
-    horizontalLayout_7->addWidget(checkBox_3);
+    horizontalLayout_7->addWidget(pushRemoteOnAnyUpdateCheckbox);
 
     verticalLayout_3->addLayout(horizontalLayout_7);
 
@@ -371,28 +371,28 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
         QCoreApplication::translate("Settings", "Form", nullptr));
     label_10->setText(
         QCoreApplication::translate("Settings", "Account", nullptr));
-    lineEdit_7->setInputMask(QString());
-    lineEdit_7->setPlaceholderText(
+    lineEdit_Login->setInputMask(QString());
+    lineEdit_Login->setPlaceholderText(
         QCoreApplication::translate("Settings", "Login", nullptr));
-    lineEdit_8->setText(QString());
-    lineEdit_8->setPlaceholderText(
+    lineEdit_Password->setText(QString());
+    lineEdit_Password->setPlaceholderText(
         QCoreApplication::translate("Settings", "Password", nullptr));
-    pushButton->setText(
+    loginButton->setText(
         QCoreApplication::translate("Settings", "Login", nullptr));
     tabWidget->setTabText(
         tabWidget->indexOf(accountConf),
         QCoreApplication::translate("Settings", "Account", nullptr));
     label_8->setText(
         QCoreApplication::translate("Settings", "App behaviour", nullptr));
-    checkBox_4->setText(QCoreApplication::translate(
+    authOnStartButton->setText(QCoreApplication::translate(
         "Settings", "Authenticate on server on start", nullptr));
-    checkBox->setText(QCoreApplication::translate(
+    pullRemoteOnStartButton->setText(QCoreApplication::translate(
         "Settings", "Pull remote on start", nullptr));
     label_7->setText(
         QCoreApplication::translate("Settings", "Push remote", nullptr));
-    checkBox_2->setText(
+    pushRemoteOnCloseCheckbox->setText(
         QCoreApplication::translate("Settings", "on close", nullptr));
-    checkBox_3->setText(
+    pushRemoteOnAnyUpdateCheckbox->setText(
         QCoreApplication::translate("Settings", "on any update", nullptr));
     tabWidget->setTabText(
         tabWidget->indexOf(behaviourTab),
@@ -430,6 +430,25 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
   Settings() {}
   ~Settings() {}
+
+  void onPathsApplyPressed(){
+    string newApiUrl = ApiUrlLineEdit->text().toStdString();
+    string newMusicStorageUrl = RemoteMusicLineEdit->text().toStdString();
+    string newUserdataStorageUrl = RemoteUserdataLineEdit->text().toStdString();
+    string newLocalMusicStoragePath = LocalMusicLineEdit->text().toStdString();
+    string newLocalUserdataStoragePath = LocalDataLineEdit->text().toStdString();
+    string newDatabasePath = DatabasePathLineEdit->text().toStdString();
+    setConfigValue("apiUrl", newApiUrl);
+    setConfigValue("musicStorageUrl", newMusicStorageUrl);
+    setConfigValue("userdataStorageUrl", newUserdataStorageUrl);
+    setConfigValue("apiUrl", newLocalMusicStoragePath);
+    setConfigValue("apiUrl", newLocalUserdataStoragePath);
+    setConfigValue("apiUrl", newDatabasePath);
+  }
+  void onLoginPressed(){}
+  void onPushRemotePressed(){}
+  void onPullRemotePressed(){}
+  void onDownloadDatabasePressed(){}
 };
 
 #endif  // SETTINGS_H

@@ -4,7 +4,10 @@
 
 #include <QApplication>
 #include <QFile>
+#include <cstddef>
 #include <iostream>
+#include <qerrormessage.h>
+#include <qmessagebox.h>
 #include <string>
 #include <vector>
 
@@ -13,15 +16,44 @@
 #include "SoundMaker.hpp"
 #include "macro.hpp"
 #include "ui/MainWindow.hpp"
-
+#include <QErrorMessage>
+#include <QMessageBox>
 
 using namespace std;
 
-
 int main(int argc, char *argv[]) {
+  // init
 
-  
   QApplication app(argc, argv);
+
+  if (!filesystem::exists("config.json")) {
+    
+    QMessageBox::critical(
+      nullptr,
+      QString::fromUtf8(
+        "Critical error"),
+        QString::fromUtf8("No config file found. \n get config from source or rebuild app."));
+    return app.exec();
+  }
+  if (!filesystem::exists(getConfigValue("databasePath"))) {
+    // QErrorMessage *errorMessage = new QErrorMessage();
+    switch (QMessageBox::question(
+        nullptr, QString::fromUtf8("Bad database"),
+        QString::fromUtf8("Database is not valid, or does not exist. Would you "
+                          "like to download database?\n(Can take a while to load, just wait)"),
+        QMessageBox::Yes | QMessageBox::No)) {
+    case QMessageBox::Yes:
+      client.downloadDatabase();
+      break;
+    }
+
+  }
+  if (getConfigBoolValue("authenticateOnStart")) {
+    client.authenticate(getConfigValue("username"), getConfigValue("password"));
+  }
+  // cout <<
+  // filesystem::last_write_time(filesystem::path(getConfigValue("databasePath")))
+  // << endl;
 
   app.setWindowIcon(QIcon("resource/logo.ico"));
   try {
@@ -35,7 +67,7 @@ int main(int argc, char *argv[]) {
   soundmaker.make();
 
   mainWindow->setupUi();
-  client.authenticate("InTostor", "Cummunism");
+
   // client.downloadDatabase();
 
   mainWindow->show();

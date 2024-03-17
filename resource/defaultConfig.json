@@ -1,12 +1,15 @@
 {
-  "apiUrl":"http://music.epsilon.explorers.mdomain/api/",
-  "musicStorageUrl":"http://music.epsilon.explorers.mdomain/Music/",
-  "userdataStorageUrl":"http://music.epsilon.explorers.mdomain/userdata/",
-  "localMusicStoragePath":"Music/",
-  "localUserdataStoragePath":"./userdata/",
-  "databasePath":"./database.sqlite3",
-  "syncDatabaseOnStart":true,
-  "syncUserdataOnStart":true,
-  "authenticateOnStart":true,
-  "loglevel":2
+  "apiUrl": "https://music.explorers.net.ru/api/",
+  "musicStorageUrl": "https://music.explorers.net.ru/Music/",
+  "userdataStorageUrl": "https://music.explorers.net.ru/userdata/",
+  "localMusicStoragePath": "Music/",
+  "localUserdataStoragePath": "./userdata/",
+  "databasePath": "./database.sqlite3",
+  "syncDatabaseOnStart": true,
+  "databaseValidDays": 30,
+  "syncUserdataOnStart": true,
+  "authenticateOnStart": true,
+  "loglevel": 2,
+  "username":"InTostor",
+  "password":"Cummunism"
 }

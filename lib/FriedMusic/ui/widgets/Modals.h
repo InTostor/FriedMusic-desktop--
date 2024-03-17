@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <iostream>
+#include <qpushbutton.h>
 
 #include "Library.hpp"
 
@@ -19,6 +20,7 @@ public:
   QVBoxLayout *mainLayout;
   QCheckBox *downloadCheckbox;
   QCheckBox *favouriteCheckbox;
+  QPushButton *addToPlaylistButton;
   Track _track;
 
   void setup(Track track) {
@@ -39,8 +41,12 @@ public:
 
     mainLayout->addWidget(favouriteCheckbox);
 
+    addToPlaylistButton = new QPushButton(this);
+    mainLayout->addWidget(addToPlaylistButton);
+
     downloadCheckbox->setText("Download");
     favouriteCheckbox->setText("Favourite");
+    addToPlaylistButton->setText("add to");
 
     if (client.isTrackDownloaded(track)) {
       downloadCheckbox->setCheckState(Qt::Checked);
@@ -58,6 +64,8 @@ public:
             &TrackActionsModal::onDownloadPressed);
     connect(favouriteCheckbox, &QCheckBox::pressed, this,
             &TrackActionsModal::onFavouritePressed);
+    connect(addToPlaylistButton, &QPushButton::pressed, this,
+            &TrackActionsModal::onAddToPressed);
 
     QMetaObject::connectSlotsByName(this);
   } // setupUi
@@ -85,14 +93,17 @@ public:
     Library::savePlaylistLocally(favouritePlaylist);
     close();
   }
+  void onAddToPressed() {
+    close();
+  }
 };
-
 
 class PlaylistActionsModal : public virtual StandartGlobalUser, public QWidget {
 
 public:
   QVBoxLayout *mainLayout;
   Source _playlistSource;
+  QPushButton *editButton;
 
   void setup(Source playlistSource) {
     _playlistSource = playlistSource;
@@ -103,10 +114,10 @@ public:
     mainLayout = new QVBoxLayout(this);
     mainLayout->setObjectName(QString::fromUtf8("mainLayout"));
 
-
-
+    editButton = new QPushButton(this);
+    editButton->setText("Edit");
+    mainLayout->addWidget(editButton);
 
     QMetaObject::connectSlotsByName(this);
   } // setupUi
-
 };

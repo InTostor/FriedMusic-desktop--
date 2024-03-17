@@ -174,6 +174,7 @@ public:
       Track track(trackSource);
       track = client.assembleTrack(track);
       generatedFromTracksPlaylist.tracks.push_back(track);
+      
     }
     int index = 0;
     for (Track track : generatedFromTracksPlaylist.tracks) {

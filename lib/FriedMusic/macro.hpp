@@ -111,6 +111,17 @@ static inline std::string getConfigValue(const std::string &key) {
   }
 }
 
+static inline bool getConfigBoolValue(const std::string &key) {
+  std::ifstream file("config.json");
+  if (!file.is_open()) {
+    // harakiri or try to get something
+    return "";
+  } else {
+    nlohmann::json config = nlohmann::json::parse(file);
+    return config[key];
+  }
+}
+
 inline void setConfigValue(const std::string &key, const std::string &value) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
@@ -118,6 +129,10 @@ inline void setConfigValue(const std::string &key, const std::string &value) {
   } else {
     nlohmann::json config = nlohmann::json::parse(file);
     config[key] = value;
+    file.close();
+    std::ofstream out("config.json");
+    out << config;
+    out.close();
   }
 }
 inline void setConfigValue(const std::string &key, const int &value) {
@@ -127,6 +142,10 @@ inline void setConfigValue(const std::string &key, const int &value) {
   } else {
     nlohmann::json config = nlohmann::json::parse(file);
     config[key] = value;
+    file.close();
+    std::ofstream out("config.json");
+    out << config;
+    out.close();
   }
 }
 

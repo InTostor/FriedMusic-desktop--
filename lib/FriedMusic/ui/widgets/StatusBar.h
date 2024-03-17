@@ -69,6 +69,7 @@ class StatusBar : public virtual StandartGlobalUser, public QWidget {
 
     // QMetaObject::connectSlotsByName(this);
     QMetaObject::connectSlotsByName(static_cast<QWidget *>(this));
+    onAuthenticationTryed();
   }  // setupUi
 
   void retranslateUi() {
