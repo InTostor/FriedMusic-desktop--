@@ -4,9 +4,7 @@
 
 #include "Client.hpp"
 #include "Data.hpp"
-#include "SQLiteCpp/Database.h"
 #include "SQLiteCpp/SQLiteCpp.h"
-#include "SQLiteCpp/Statement.h"
 #include "StandartGlobalUser.hpp"
 #include "globals.h"
 #include "macro.hpp"
@@ -112,9 +110,14 @@ public:
     file.open(path, ios::out);
     int i = 0;
     for (Track track : playlist.tracks) {
+      if (track.filename.length() < 4) {
+        continue;
+      }
       file << track.filename;
+      cout << track.filename;
       if (i < playlist.size()) {
         file << "\n";
+        cout << endl;
       }
     }
     file.close();
@@ -131,10 +134,10 @@ public:
 
   static inline fuzzySearchOutput fuzzySearch(string query) {
     fuzzySearchOutput out;
-    if (query.length() == 0){
+    if (query.length() == 0) {
       return out;
     }
-    
+
     SQLite::Database db(getConfigValue("databasePath"), SQLite::OPEN_READONLY);
 
     string sql;
@@ -158,8 +161,9 @@ public:
           sql += " or ";
         }
       }
-      sql += " LIMIT 1000 ";
+      sql += " LIMIT 2000 ";
       SQLite::Statement query(db, sql);
+
       // bind
       int i = 1;
       for (string token : tokens) {
@@ -171,6 +175,7 @@ public:
       }
       vector<string> tempArtists;
       vector<string> tempTrackFilename;
+
       while (query.executeStep()) {
         const char *currArtitst = query.getColumn(1);
         const char *currTrack = query.getColumn(0);
@@ -181,12 +186,14 @@ public:
         }
         tempTrackFilename.push_back(currTrack);
       }
+
       // set tracks
       out.artists = tempArtists;
 
       out.tracks = client.lookupTrack(tempTrackFilename);
 
       for (string token : tokens) {
+
         for (const auto &entry : filesystem::directory_iterator(
                  getConfigValue("localUserdataStoragePath"))) {
           if (string(entry.path()).find(token) != std::string::npos) {
@@ -198,6 +205,60 @@ public:
         }
       }
     }
+    cout << out.tracks[0].path << endl;
     return out;
   }
+  static inline vector<Source> getLocalPlaylistSources() {
+    string ext(".fpl");
+    string path = getConfigValue("localUserdataStoragePath");
+    vector<Source> sources;
+    for (auto &p : filesystem::recursive_directory_iterator(path)) {
+      if (p.path().extension() == ext) {
+        sources.push_back(Source(p.path(), Types::StorageType::LOCAL,
+                                 Types::PathType::FILESYSTEMPATH,
+                                 Types::DataType::PLAYLIST));
+      }
+    }
+    return sources;
+  }
+  static inline void addTrackToFilePlaylist(Track track,
+                                            Source playlistSource) {
+    if (playlistSource.storageType == Types::StorageType::LOCAL) {
+      ofstream file;
+      file.open(playlistSource.path, ios::out | ios::app | ios::binary);
+      file << filesystem::path(track.source.path).filename().string() << endl;
+      file.close();
+      return;
+    }
+  }
+};
+
+class MainGeneratorPlaylist : public Playlist {
+  
+  Track getNextTrack() {
+    vector<string> references = {
+      "history",
+      "favourite",
+      "database"
+    };
+    vector<float> referenceWeights = {
+      10.0,
+      20.0,
+      1.0
+    };
+    vector<string> properties = {
+      "self",
+      "album",
+      "artist",
+      "genre",
+    };
+    vector<float> propertyWeights = {
+      2.0,
+      10.0,
+      20.0,
+      10.0
+    };
+    string referenceDecision = randomByWeight(references,referenceWeights);
+  };
+
 };

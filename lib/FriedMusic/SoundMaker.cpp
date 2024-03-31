@@ -8,6 +8,7 @@
 
 #include "Client.hpp"
 #include "Data.hpp"
+#include "Library.hpp"
 #include "StandartGlobalUser.hpp"
 #include "macro.hpp"
 
@@ -102,6 +103,9 @@ void SoundMaker::make() {
                    &SoundMaker::QtMediaRedirector);
 }
 void SoundMaker::previous() {
+  if (_currentPlaylist.isDynamic) {
+    return;
+  }
   bool shouldPlay = player->state() == QMediaPlayer::PlayingState;
   if (_currentTrackIndex > 0) {
     setCurrentIndex(_currentTrackIndex - 1);
@@ -111,10 +115,14 @@ void SoundMaker::previous() {
   }
 };
 void SoundMaker::next() {
-  if (_currentTrackIndex >= _currentPlaylist.size() - 1) {
-    setCurrentIndex(0);
+  if (_currentPlaylist.isDynamic) {
+    setTrack(_currentPlaylist.getNextTrack());
   } else {
-    setCurrentIndex(_currentTrackIndex + 1);
+    if (_currentTrackIndex >= _currentPlaylist.size() - 1) {
+      setCurrentIndex(0);
+    } else {
+      setCurrentIndex(_currentTrackIndex + 1);
+    }
   }
   play();
 };
@@ -136,22 +144,20 @@ void SoundMaker::setTime(float time) {
 }
 void SoundMaker::setCurrentIndex(int value) {
   _currentTrackIndex = value;
-  
+
   currentTrack = _currentPlaylist.tracks[value];
   setTrack(currentTrack);
 }
-void SoundMaker::setPlaylist(Playlist playlist, int index) {
-  cout << playlist.size()<<endl;
-
+void SoundMaker::setPlaylist(Playlist &playlist, int index) {
   _currentPlaylist = playlist;
-  _originalPlaylist = playlist;
+  // _originalPlaylist = playlist;
   if (getIsShuffled()) {
     setShuffled(true);
   }
-  setCurrentIndex(index);
   eventProcessor(Types::Event::SOUNDMAKER_PLAYLIST_SET);
+  setCurrentIndex(index);
 }
-void SoundMaker::setPlaylist(Source playlist) {
+void SoundMaker::setPlaylist(Source &playlist) {
   Playlist prepared = client.getPlaylistFromSource(playlist);
   setPlaylist(prepared);
 }
@@ -219,4 +225,16 @@ void SoundMaker::onMediaFinished() {
     play();
     break;
   }
+}
+
+void SoundMaker::eventProcessor(const Types::Event &event) {
+  if (event == Types::Event::onMediaPlayerPositionChanged) {
+    if (!hasSavedToHistory and
+        getTime() >= getConfigIntValue("secondsToAddTrackToHistory") * 1000) {
+      Library::addTrackToFilePlaylist(
+          getTrack(), Library::getPlaylistSource("history.fpl"));
+      hasSavedToHistory = true;
+    }
+  }
+  StandartGlobalCaller::eventProcessor(event);
 }

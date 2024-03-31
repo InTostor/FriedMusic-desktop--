@@ -136,4 +136,5 @@ struct Playlist {
   std::string name = "";
   bool isDynamic = false;
   int size() { return distance(tracks.begin(), tracks.end()); }
+  Track getNextTrack(){};
 };

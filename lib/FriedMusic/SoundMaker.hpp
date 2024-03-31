@@ -20,7 +20,9 @@ private:
   Track currentTrack;
   int _currentTrackIndex = -1;
   Playlist _currentPlaylist;
-  Playlist _originalPlaylist;
+
+  bool hasSavedToHistory = false;
+  // Playlist _originalPlaylist;
 
   // Cuz Qt is bullshit, but better than other
 public:
@@ -66,8 +68,8 @@ public:
 
   void setTime(float time);
   void setCurrentIndex(int value);
-  void setPlaylist(Playlist playlist, int index = 0);
-  void setPlaylist(Source playlist);
+  void setPlaylist(Playlist &playlist, int index = 0);
+  void setPlaylist(Source &playlist);
   void setShuffled(bool value);
   void setUrl(string url);
   void setTrack(Track track);
@@ -83,4 +85,6 @@ public:
   bool getIsPlaying();
   Playlist getCurrentPlaylist();
   void onMediaFinished();
+
+  void eventProcessor(const Types::Event &event);
 };

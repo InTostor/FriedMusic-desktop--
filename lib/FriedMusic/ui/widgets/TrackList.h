@@ -30,11 +30,10 @@
 #include "globals.h"
 
 
-class TrackList : public virtual StandartGlobalUser, public QWidget {
+class TrackList : public virtual StandartGlobalUser, public QWidget, public virtual PlaylistHolder {
 public:
   QVBoxLayout *verticalLayout;
   QListWidget *listWidget;
-  Playlist _playlist;
   vector<TrackLine *> lines;
 
   void setupUi() {
@@ -55,23 +54,27 @@ public:
     verticalLayout->addWidget(listWidget);
     onSoundMakerPlaylistInsert();
   };
-  void setPlaylist(Playlist playlist, bool autoAssemble = true) {
-    _playlist = playlist;
+  void setPlaylist(Playlist &playlist, bool autoAssemble = true) {
+    listWidget->clear();
+    lines.clear();
+    cout << "cleared" << endl;
     bool isPlaylistValid = (playlist.size()>0);
     if (!isPlaylistValid){
       return;
     }
-    if (autoAssemble and !_playlist.tracks[0].isAssembled){
-      _playlist.tracks = client.assembleTracks(_playlist.tracks);
+    if (autoAssemble and !playlist.tracks[0].isAssembled){
+      playlist.tracks = client.assembleTracks(playlist.tracks);
     }
-    listWidget->clear();
-    lines = {};
+    
+    
     int index = 0;
     for (Track track : playlist.tracks) {
       TrackLine *trackLine = new TrackLine();
+      trackLine->setPlaylistHolder(this);
       trackLine->mainWindow = mainWindow;
       trackLine->setupUi();
       trackLine->setTrack(track, playlist, index);
+      
       mainWindow->registerListeners(trackLine);
 
       lines.push_back(trackLine);
@@ -93,12 +96,12 @@ public:
     Source favSource("./userdata/favourite.fpl", Types::StorageType::LOCAL,
                      Types::PathType::FILESYSTEMPATH,
                      Types::DataType::PLAYLIST);
-
+    Playlist currentPlaylist = soundmaker.getCurrentPlaylist();
     for (int i = 0; i < lines.size(); i++) {
       // update each
       bool isInFavourite =
-          client.isTrackInPlaylist(lines[i]->track, favSource);
-      bool isDownloaded = client.isTrackDownloaded(lines[i]->track);
+          client.isTrackInPlaylist(currentPlaylist.tracks[i], favSource);
+      bool isDownloaded = client.isTrackDownloaded(currentPlaylist.tracks[i]);
       lines[i]->updateRelation(isInFavourite, isDownloaded);
     }
   }
@@ -114,6 +117,9 @@ public:
     default:
       break;
     }
+  }
+  Playlist getHoldedPlaylist(){
+    return soundmaker.getCurrentPlaylist();
   }
 };
 #endif

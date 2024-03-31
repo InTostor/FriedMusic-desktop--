@@ -10,9 +10,58 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <iostream>
+#include <qcombobox.h>
 #include <qpushbutton.h>
+#include <qwidget.h>
 
 #include "Library.hpp"
+
+
+class AddTrackToPlaylistWindow : public virtual StandartGlobalUser, public QWidget {
+
+public:
+  QVBoxLayout *mainLayout;
+  Source _trackSource;
+  QComboBox *playlistSelector;
+  QPushButton *confirmButton;
+
+  void setup(Source trackSource) {
+    _trackSource = trackSource;
+    if (this->objectName().isEmpty())
+      this->setObjectName(QString::fromUtf8("this"));
+    this->setWindowTitle("add track to playlist");
+    this->resize(500, 300);
+    mainLayout = new QVBoxLayout(this);
+    mainLayout->setObjectName(QString::fromUtf8("mainLayout"));
+
+    playlistSelector = new QComboBox;
+    vector<Source> playlistSources = Library::getLocalPlaylistSources();
+    for (Source plSource : playlistSources){
+      string playlistName = filesystem::path(plSource.path).filename();
+      playlistSelector->addItem(QString::fromStdString(playlistName));
+    }
+    confirmButton = new QPushButton(this);
+    confirmButton->setText("Add");
+    mainLayout->addWidget(playlistSelector);
+    mainLayout->addWidget(confirmButton);
+
+    connect(confirmButton,&QPushButton::pressed,this,&AddTrackToPlaylistWindow::onConfirm);
+    QMetaObject::connectSlotsByName(this);
+  } // setupUi
+  void onConfirm(){
+    Playlist targetPlaylist = client.getPlaylistFromSource(
+      Library::getPlaylistSource(playlistSelector->currentText().toStdString()),
+      false
+      );
+    Track madeTrack;
+    madeTrack.source = _trackSource;
+    madeTrack.filename = filesystem::path(_trackSource.path).filename();
+    cout << madeTrack.filename << endl;
+    targetPlaylist.tracks.push_back(madeTrack);
+    Library::savePlaylistLocally(targetPlaylist);
+    close();
+  }
+};
 
 class TrackActionsModal : public virtual StandartGlobalUser, public QWidget {
 
@@ -81,7 +130,7 @@ public:
   }
   void onFavouritePressed() {
     Source favourite = Library::getPlaylistSource("favourite.fpl");
-    Playlist favouritePlaylist = client.getPlaylistFromSource(favourite);
+    Playlist favouritePlaylist = client.getPlaylistFromSource(favourite,false);
     if (client.isTrackInPlaylist(_track, favourite)) {
       vector<Track>::iterator it = std::find_if(
           favouritePlaylist.tracks.begin(), favouritePlaylist.tracks.end(),
@@ -94,6 +143,12 @@ public:
     close();
   }
   void onAddToPressed() {
+    AddTrackToPlaylistWindow *addWindow = new AddTrackToPlaylistWindow();
+    addWindow->setup(_track.source);
+    QPoint globalCursorPos = QCursor::pos();
+    addWindow->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
+                       addWindow->geometry().x(), addWindow->geometry().y());
+    addWindow->show();
     close();
   }
 };
@@ -121,3 +176,4 @@ public:
     QMetaObject::connectSlotsByName(this);
   } // setupUi
 };
+

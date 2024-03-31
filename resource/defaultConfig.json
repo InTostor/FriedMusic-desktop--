@@ -9,6 +9,7 @@
   "databaseValidDays": 30,
   "syncUserdataOnStart": true,
   "authenticateOnStart": true,
+  "secondsToAddTrackToHistory" : 15,
   "loglevel": 2,
   "username":"InTostor",
   "password":"Cummunism"

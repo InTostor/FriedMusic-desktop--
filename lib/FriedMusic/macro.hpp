@@ -13,6 +13,28 @@
 #include <string>
 #include <vector>
 
+typedef int64_t msec_t;
+#if defined(__WIN32__)
+
+#include <windows.h>
+
+inline msec_t time_ms(void) { return timeGetTime(); }
+
+#else
+
+#include <sys/time.h>
+
+inline msec_t time_ms(void) {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return (msec_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+#endif
+
+#endif
+#define timestamp std::cout << __LINE__ << ";" << __FILE__ << ";" << time_ms() << std::endl;
+
 #define FUNC_NAME(a)         (QString(#a).remove(QRegExp("\\((.*)\\)")).trimmed().toLatin1().constData())
 
 inline std::string ReplaceInString(std::string subject,
@@ -122,18 +144,33 @@ static inline bool getConfigBoolValue(const std::string &key) {
   }
 }
 
+
+static inline int getConfigIntValue(const std::string &key) {
+  std::ifstream file("config.json");
+  if (!file.is_open()) {
+    // harakiri or try to get something
+    return -1;
+  } else {
+    nlohmann::json config = nlohmann::json::parse(file);
+    return config[key];
+  }
+}
+
 inline void setConfigValue(const std::string &key, const std::string &value) {
   std::ifstream file("config.json");
   if (!file.is_open()) {
     return;
   } else {
     nlohmann::json config = nlohmann::json::parse(file);
+     std::cout << config[key] << std::endl;
     config[key] = value;
+     std::cout << config[key] << std::endl;
     file.close();
     std::ofstream out("config.json");
-    out << config;
+    out << config << std::endl;
     out.close();
   }
+  std::cout << "|" <<std::endl;
 }
 inline void setConfigValue(const std::string &key, const int &value) {
   std::ifstream file("config.json");
@@ -144,7 +181,7 @@ inline void setConfigValue(const std::string &key, const int &value) {
     config[key] = value;
     file.close();
     std::ofstream out("config.json");
-    out << config;
+    out << config << std::endl;
     out.close();
   }
 }
@@ -198,6 +235,28 @@ inline std::string secondsToTime(int seconds) {
   return ret;
 }
 
+template<typename T>
+inline T randomByWeight(std::vector<T> values, std::vector<float> weights){
+  // alghorithm from https://dev.to/jacktt/understanding-the-weighted-random-algorithm-581p
+  float totalWeight = 0;
+  for (float weight : weights){
+    totalWeight += weight;
+  }
+  // https://stackoverflow.com/questions/686353/random-float-number-generation
+  // quite ancient way
+  srand (static_cast <unsigned> (time_ms()));
+  float random = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/totalWeight));
+  float cursor = 0;
+  for (int i=0; i< distance(weights.begin(), weights.end()); i++){
+    cursor += weights[i];
+    if (cursor >= random){
+      return values[i];
+    }
+  }
+  // if something goes wrong
+  return values[0];
+}
+
 template <typename T>
 inline std::vector<T> sliceVector(std::vector<T> const &v, int X, int Y) {
 
@@ -212,24 +271,3 @@ inline std::vector<T> sliceVector(std::vector<T> const &v, int X, int Y) {
   return vector;
 }
 
-typedef int64_t msec_t;
-#if defined(__WIN32__)
-
-#include <windows.h>
-
-inline msec_t time_ms(void) { return timeGetTime(); }
-
-#else
-
-#include <sys/time.h>
-
-inline msec_t time_ms(void) {
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return (msec_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
-#endif
-
-#endif
-#define timestamp std::cout << __LINE__ << ";" << __FILE__ << ";" << time_ms() << std::endl;

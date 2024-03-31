@@ -22,6 +22,7 @@
 #include <QVBoxLayout>
 #include <QVariant>
 #include <QWidget>
+#include <qpushbutton.h>
 
 #include "../../StandartGlobalUser.hpp"
 #include "../ui.hpp"
@@ -84,6 +85,8 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
   QLabel *aboutPageLabel_2;
   QLabel *aboutPageLabel_3;
   QLabel *aboutPageLabel_4;
+
+  QPushButton *applyPathSettings;
 
   void setupUi() {
     QWidget *Settings = this;
@@ -293,6 +296,10 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     horizontalLayout_10->addLayout(localPathsLayout);
 
+    applyPathSettings = new QPushButton(pathsConf);
+    applyPathSettings->setText(QString::fromUtf8("Apply"));
+    gridLayout_3->addWidget(applyPathSettings, 2,0,1,1);
+
     gridLayout_3->addLayout(horizontalLayout_10, 1, 0, 1, 1);
 
     label_9 = new QLabel(pathsConf);
@@ -364,6 +371,11 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     LocalMusicLineEdit->setText(QString::fromStdString(getConfigValue("localMusicStoragePath")));
     LocalDataLineEdit->setText(QString::fromStdString(getConfigValue("localUserdataStoragePath")));
 
+    lineEdit_Login->setText(QString::fromStdString(getConfigValue("username")));
+    lineEdit_Password->setText(QString::fromStdString(getConfigValue("password")));
+
+    connect(applyPathSettings,&QPushButton::pressed,this,&Settings::onPathsApplyPressed);
+    connect(loginButton,&QPushButton::pressed,this,&Settings::onLoginPressed);
   }  // setupUi
 
   void retranslateUi(QWidget *Settings) {
@@ -432,6 +444,7 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
   ~Settings() {}
 
   void onPathsApplyPressed(){
+    timestamp
     string newApiUrl = ApiUrlLineEdit->text().toStdString();
     string newMusicStorageUrl = RemoteMusicLineEdit->text().toStdString();
     string newUserdataStorageUrl = RemoteUserdataLineEdit->text().toStdString();
@@ -441,11 +454,18 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     setConfigValue("apiUrl", newApiUrl);
     setConfigValue("musicStorageUrl", newMusicStorageUrl);
     setConfigValue("userdataStorageUrl", newUserdataStorageUrl);
-    setConfigValue("apiUrl", newLocalMusicStoragePath);
-    setConfigValue("apiUrl", newLocalUserdataStoragePath);
-    setConfigValue("apiUrl", newDatabasePath);
+    setConfigValue("localMusicStoragePath", newLocalMusicStoragePath);
+    setConfigValue("localUserdataStoragePath", newLocalUserdataStoragePath);
+    setConfigValue("databasePath", newDatabasePath);
   }
-  void onLoginPressed(){}
+//   !WARNING! this is extremely unsafe, violates most of the security policies and maybe geneva convention. Find better way to work with credentials!
+  void onLoginPressed(){
+    string newUsername = lineEdit_Login->text().toStdString();
+    string newPassword = lineEdit_Password->text().toStdString();
+    setConfigValue("username", newUsername);
+    setConfigValue("password", newPassword);
+    client.authenticate();
+  }
   void onPushRemotePressed(){}
   void onPullRemotePressed(){}
   void onDownloadDatabasePressed(){}

@@ -136,8 +136,6 @@ public:
     nameLabel->setText(QString::fromStdString(_playlistSource.path));
   }
   void onPlayPressed() {
-    cout << soundmaker.getCurrentPlaylist().name ;
-    cout << std::filesystem::path(_playlistSource.path).filename()<< endl;
     if (soundmaker.getCurrentPlaylist().name !=
         std::filesystem::path(_playlistSource.path).filename()) {
       soundmaker.setPlaylist(_playlistSource);
@@ -154,6 +152,7 @@ public:
   }
   void onExtraPressed() {
     PlaylistActionsModal *modal = new PlaylistActionsModal();
+    modal->mainWindow = mainWindow;
     modal->setup(_playlistSource);
     QPoint globalCursorPos = QCursor::pos();
     modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),

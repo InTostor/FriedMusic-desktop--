@@ -11,18 +11,21 @@
 #include "Data.hpp"
 #include "StandartGlobalUser.hpp"
 
-
 using namespace std;
 
 class Client : public StandartGlobalCaller {
- private:
+private:
   bool _authenticated;
   string _username;
   Types::StorageType databaseType;
   cpr::Cookies cookies;
 
- public:
+public:
+  //   !WARNING! this is extremely unsafe, violates most of the security
+  //   policies and maybe geneva convention. Find better way to work with
+  //   credentials!
   void authenticate(string username, string password);
+  void authenticate();
   string getUsername();
   bool isServerAccessible();
   bool isAuthenticated();

@@ -41,6 +41,11 @@ void Client::authenticate(string username, string password) {
   }
   eventProcessor(Types::Event::AUTHENTICATION_TRYED);
 }
+void Client::authenticate(){
+  string username = getConfigValue("username");
+  string password = getConfigValue("password");
+  Client::authenticate(username,password);
+}
 string Client::getUsername() { return _username; };
 bool Client::isServerAccessible() {
   cpr::Response response = cpr::Head(cpr::Url(getConfigValue("apiUrl")));
@@ -201,8 +206,10 @@ Source Client::lookupTrack(string filename) {
                   Types::PathType::FILESYSTEMPATH, Types::DataType::TRACK);
     return source;
   }
-  string remoteUrl = getConfigValue("musicStorageUrl") + filename;
 
+  // Assuming that filename came from database, track exists. If filename is not in database than it can be only locally
+  // next code makes no sense, only delays execution
+  /*
   cpr::Response response =
       cpr::Head(cpr::Url(ReplaceInString(remoteUrl, " ", "%20")));
   if (response.status_code == 200) {
@@ -211,7 +218,10 @@ Source Client::lookupTrack(string filename) {
     return source;
   }
   Source source;
-
+  */
+  string remoteUrl = getConfigValue("musicStorageUrl") + filename;
+  Source source(remoteUrl, Types::StorageType::REMOTE, Types::PathType::URL,
+                  Types::DataType::TRACK);
   return source;
 }
 vector<Source> Client::lookupTrack(vector<string> filenames) {
@@ -421,7 +431,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
   for (int i = 0; i < playlist.tracks.size(); i++) {
     playlist.tracks[i].playlistTrackNumber = i;
   }
-  reverse(playlist.tracks.begin(), playlist.tracks.end());
+  // reverse(playlist.tracks.begin(), playlist.tracks.end());
   return playlist;
 };
 bool Client::isTrackInPlaylist(Track track, Playlist playlist) {

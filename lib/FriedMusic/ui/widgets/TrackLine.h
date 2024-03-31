@@ -18,12 +18,15 @@
 #include "../ui.hpp"
 #include "Modals.h"
 
-
-
 using namespace std;
 
+class PlaylistHolder {
+public:
+  virtual Playlist getHoldedPlaylist(){};
+};
+
 class TrackLine : public virtual StandartGlobalUser, public QWidget {
- public:
+public:
   QHBoxLayout *horizontalLayout;
   QVBoxLayout *verticalLayout;
   QSpacerItem *verticalSpacer;
@@ -41,9 +44,10 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
   QHBoxLayout *horizontalLayout_2;
   QPushButton *extraButton;
 
+  TrackActionsModal *modal;
+
   int indexInPlaylist = -1;
-  Track track;
-  Playlist parentPlaylist;
+  PlaylistHolder *holder;
   bool setup = false;
 
   void setupUi() {
@@ -184,13 +188,14 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     this->connect(extraButton, &QPushButton::pressed, this,
                   &TrackLine::onExtraPressed);
 
-    retranslateUi(this);
+    // retranslateUi(this);
 
     QMetaObject::connectSlotsByName(this);
     setup = true;
-  }  // setupUi
+  } // setupUi
 
   void retranslateUi(QWidget *Form) {
+    /*
     Form->setWindowTitle(QCoreApplication::translate("Form", "Form", nullptr));
     playButton->setText(QString());
     durationLabel->setText(
@@ -202,45 +207,57 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     filenameLabel->setText(
         QCoreApplication::translate("Form", "Filename", nullptr));
     extraButton->setText(QString());
-  }  // retranslateUi
+    */
+  } // retranslateUi
+  void setPlaylistHolder(PlaylistHolder *_holder) { holder = _holder; }
+  void setTrack(Track track, Playlist _playlist, int index = -1) {
 
-  void setTrack(Track &_track, Playlist &_playlist, int index = -1) {
     indexInPlaylist = index;
-    track = _track;
-    parentPlaylist = _playlist;
     titleLabel->setText(QString::fromStdString(track.title));
     albumLabel->setText(QString::fromStdString(track.album));
     artistsLabel->setText(QString::fromStdString(track.artists));
     filenameLabel->setText(QString::fromStdString(track.filename));
     durationLabel->setText(
         QString::fromStdString(secondsToTime(track.duration)));
+
     if (soundmaker.getTrack().filename == track.filename and
         soundmaker.getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
     }
+
   }
   void onPlayPressed() {
-    if (soundmaker.getCurrentPlaylist().name != parentPlaylist.name){
-      soundmaker.setPlaylist(parentPlaylist,indexInPlaylist);
-      soundmaker.play();
-      return;
-    }
-    if (soundmaker.getTrack().filename == track.filename) {
-      if (soundmaker.getIsPlaying()) {
-        soundmaker.pause();
+    if (holder) {
+      Playlist parentPlaylist = holder->getHoldedPlaylist();
+      Track track = parentPlaylist.tracks[indexInPlaylist];
+      if (soundmaker.getCurrentPlaylist().name != parentPlaylist.name) {
+        soundmaker.setPlaylist(parentPlaylist, indexInPlaylist);
+        soundmaker.play();
+        return;
+      }
+      if (soundmaker.getTrack().filename == track.filename) {
+        if (soundmaker.getIsPlaying()) {
+          soundmaker.pause();
+        } else {
+          soundmaker.play();
+        }
+
       } else {
+        soundmaker.setCurrentIndex(indexInPlaylist);
         soundmaker.play();
       }
-
-    } else {
-      soundmaker.setCurrentIndex(indexInPlaylist);
-      soundmaker.play();
     }
   }
   void onExtraPressed() {
-    TrackActionsModal *modal = new TrackActionsModal();
+    Playlist parentPlaylist = holder->getHoldedPlaylist();
+    Track track = parentPlaylist.tracks[indexInPlaylist];
+    if (modal) {
+      delete modal;
+    }
+    modal = new TrackActionsModal();
+    modal->mainWindow = mainWindow;
     modal->setup(track);
     QPoint globalCursorPos = QCursor::pos();
     modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
@@ -255,28 +272,39 @@ class TrackLine : public virtual StandartGlobalUser, public QWidget {
     if (isInFAvourite) {
     }
   }
+  void onMediaChanged() {
+    Playlist parentPlaylist = holder->getHoldedPlaylist();
+    if (indexInPlaylist>=parentPlaylist.size()){
+      return;
+    }
+    cout << indexInPlaylist << endl;
+    Track track = parentPlaylist.tracks[indexInPlaylist];
+    if (soundmaker.getTrack().filename == track.filename and
+        soundmaker.getIsPlaying()) {
+      playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
+    } else {
+      playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
+    }
+  }
 
-  ~TrackLine() { mainWindow->unregisterListener(this); }
+  ~TrackLine() { 
+    mainWindow->unregisterListener(this); }
   void eventProcessor(const Types::Event &event) {
+
     switch (event) {
-      case Types::Event::onMediaPlayerMediaChanged:
-        if (soundmaker.getTrack().filename == track.filename and
-            soundmaker.getIsPlaying()) {
-          playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
-        } else {
-          playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
-        }
-        break;
-      case Types::Event::onMediaPlayerPlaying:
-        eventProcessor(Types::Event::onMediaPlayerMediaChanged);
-        break;
-      case Types::Event::onMediaPlayerPaused:
-        eventProcessor(Types::Event::onMediaPlayerMediaChanged);
-        break;
-      case Types::Event::FILES_UPDATED:
-        break;
-      default:
-        break;
+    case Types::Event::onMediaPlayerMediaChanged:
+      onMediaChanged();
+      break;
+    case Types::Event::onMediaPlayerPlaying:
+      eventProcessor(Types::Event::onMediaPlayerMediaChanged);
+      break;
+    case Types::Event::onMediaPlayerPaused:
+      eventProcessor(Types::Event::onMediaPlayerMediaChanged);
+      break;
+    case Types::Event::FILES_UPDATED:
+      break;
+    default:
+      break;
     }
   }
 };
