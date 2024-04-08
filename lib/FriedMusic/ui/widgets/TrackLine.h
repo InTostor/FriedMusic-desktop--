@@ -226,9 +226,9 @@ public:
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
     }
-
   }
   void onPlayPressed() {
+    
     if (holder) {
       Playlist parentPlaylist = holder->getHoldedPlaylist();
       Track track = parentPlaylist.tracks[indexInPlaylist];
@@ -257,7 +257,7 @@ public:
       delete modal;
     }
     modal = new TrackActionsModal();
-    modal->mainWindow = mainWindow;
+
     modal->setup(track);
     QPoint globalCursorPos = QCursor::pos();
     modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
@@ -277,7 +277,6 @@ public:
     if (indexInPlaylist>=parentPlaylist.size()){
       return;
     }
-    cout << indexInPlaylist << endl;
     Track track = parentPlaylist.tracks[indexInPlaylist];
     if (soundmaker.getTrack().filename == track.filename and
         soundmaker.getIsPlaying()) {
@@ -287,10 +286,8 @@ public:
     }
   }
 
-  ~TrackLine() { 
-    mainWindow->unregisterListener(this); }
-  void eventProcessor(const Types::Event &event) {
 
+  void eventProcessor(const Types::Event &event) {
     switch (event) {
     case Types::Event::onMediaPlayerMediaChanged:
       onMediaChanged();

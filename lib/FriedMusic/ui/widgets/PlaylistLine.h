@@ -152,7 +152,7 @@ public:
   }
   void onExtraPressed() {
     PlaylistActionsModal *modal = new PlaylistActionsModal();
-    modal->mainWindow = mainWindow;
+    
     modal->setup(_playlistSource);
     QPoint globalCursorPos = QCursor::pos();
     modal->setGeometry(globalCursorPos.x(), globalCursorPos.y(),
@@ -167,7 +167,6 @@ public:
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
       }
     }
-    ~PlaylistLine() { mainWindow->unregisterListener(this); }
     void eventProcessor(Types::Event & event) {
       switch (event) {
       case Types::Event::SOUNDMAKER_PLAYLIST_SET:

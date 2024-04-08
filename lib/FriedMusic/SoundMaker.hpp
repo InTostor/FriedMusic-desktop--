@@ -13,13 +13,15 @@
 
 using namespace std;
 
-class SoundMaker : public StandartGlobalCaller, public QObject {
+class SoundMaker : public StandartGlobalUser, public QObject {
 private:
   bool _shuffled = false;
   Types::Loop _loopMode = Types::Loop::NONE;
   Track currentTrack;
   int _currentTrackIndex = -1;
+  // select one
   Playlist _currentPlaylist;
+  DynamicPlaylistInterface *_currentDynamicPlaylist;
 
   bool hasSavedToHistory = false;
   // Playlist _originalPlaylist;
@@ -68,7 +70,8 @@ public:
 
   void setTime(float time);
   void setCurrentIndex(int value);
-  void setPlaylist(Playlist &playlist, int index = 0);
+  void setPlaylist(Playlist playlist, int index = 0);
+  void setPlaylist(DynamicPlaylistInterface *playlist);
   void setPlaylist(Source &playlist);
   void setShuffled(bool value);
   void setUrl(string url);

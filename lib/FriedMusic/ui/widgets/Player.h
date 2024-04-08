@@ -49,6 +49,10 @@ public:
   QPushButton *addToFavouriteButton;
   QPushButton *downloadButton;
   QPushButton *addToPlaylistButton;
+  QSpacerItem *horizontalSpacer;
+  QHBoxLayout *horizontalLayout_2;
+  QPushButton *setDynamicPlaylistButton;
+  QPushButton *customizeDynamicPlaylistButton;
   QVBoxLayout *volumeLayout;
   QSlider *volumeSlider;
   QLabel *volumeLabel;
@@ -212,6 +216,32 @@ public:
 
     auxButtonLayout->addWidget(addToPlaylistButton);
 
+    horizontalSpacer =
+        new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    auxButtonLayout->addItem(horizontalSpacer);
+
+    horizontalLayout_2 = new QHBoxLayout();
+    horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+    setDynamicPlaylistButton = new QPushButton(this);
+    setDynamicPlaylistButton->setText("Dynamic");
+    setDynamicPlaylistButton->setObjectName(
+        QString::fromUtf8("setDynamicPlaylistButton"));
+    setDynamicPlaylistButton->setMaximumSize(QSize(70, 35));
+    setDynamicPlaylistButton->setMinimumSize(QSize(70, 35));
+
+    horizontalLayout_2->addWidget(setDynamicPlaylistButton);
+
+    customizeDynamicPlaylistButton = new QPushButton(this);
+    customizeDynamicPlaylistButton->setObjectName(
+        QString::fromUtf8("customizeDynamicPlaylistButton"));
+    customizeDynamicPlaylistButton->setMaximumSize(QSize(35, 35));
+    customizeDynamicPlaylistButton->setMinimumSize(QSize(35, 35));
+
+    horizontalLayout_2->addWidget(customizeDynamicPlaylistButton);
+
+    auxButtonLayout->addLayout(horizontalLayout_2);
+
     playerMainControlsLayout->addLayout(auxButtonLayout);
 
     horizontalLayout->addLayout(playerMainControlsLayout);
@@ -274,6 +304,8 @@ public:
                            &Player::onDownloadPressed);
     this->QWidget::connect(loopComboBox, &QComboBox::currentTextChanged, this,
                            &Player::onLoopComboboxSelected);
+    this->QWidget::connect(setDynamicPlaylistButton, &QPushButton::pressed,
+                           this, &Player::onDynamicPlaylistPressed);
 
     retranslateUi();
 
@@ -315,7 +347,7 @@ public:
     volumeLabel->setText(QCoreApplication::translate("Form", "100%", nullptr));
   } // retranslateUi
 
-  Player() {}
+  // Player() {}
   void onMediaPlayerMediaChanged() {
     Track currentTrack = soundmaker.getTrack();
     try {
@@ -352,7 +384,14 @@ public:
   void onPrevPressed() { soundmaker.previous(); }
   void onSeekerMoved() {
     soundmaker.setPosition(seekerSlider->value() /
-                            (float)seekerSlider->maximum());
+                           (float)seekerSlider->maximum());
+  }
+  void onDynamicPlaylistPressed() {
+    if (soundmaker.getCurrentPlaylist().name != "dynamic"){
+      MainGeneratorPlaylist *dynamic = new MainGeneratorPlaylist();
+      soundmaker.setPlaylist(dynamic);
+      soundmaker.play();
+    }
   }
   void onVolumeMoved() {
     // logarithmic
@@ -383,7 +422,7 @@ public:
     }
     Library::savePlaylistLocally(favouritePlaylist);
   }
-  void onDownloadPressed(){
+  void onDownloadPressed() {
     Track currentTrack = soundmaker.getTrack();
     Types::StorageType existence = Library::isSourceExists(currentTrack.source);
     if (existence == Types::StorageType::LOCAL ||

@@ -162,15 +162,12 @@ inline void setConfigValue(const std::string &key, const std::string &value) {
     return;
   } else {
     nlohmann::json config = nlohmann::json::parse(file);
-     std::cout << config[key] << std::endl;
     config[key] = value;
-     std::cout << config[key] << std::endl;
     file.close();
     std::ofstream out("config.json");
     out << config << std::endl;
     out.close();
   }
-  std::cout << "|" <<std::endl;
 }
 inline void setConfigValue(const std::string &key, const int &value) {
   std::ifstream file("config.json");

@@ -29,7 +29,8 @@ void SoundMaker::onMediaPlayerBackward() {}
 void SoundMaker::onMediaPlayerEncounteredError() {}
 void SoundMaker::onMediaPlayerTimeChanged() {}
 void SoundMaker::onMediaPlayerPositionChanged() {
-  eventProcessor(Types::Event::onMediaPlayerPositionChanged);
+  eventHeap.eventProcessor(Types::Event::onMediaPlayerPositionChanged);
+  // eventProcessor(Types::Event::onMediaPlayerPositionChanged);
 }
 void SoundMaker::onMediaPlayerLengthChanged() {}
 void SoundMaker::onMediaPlayerVout() {}
@@ -45,46 +46,46 @@ void SoundMaker::onMediaPlayerAudioDevice() {}
 void SoundMaker::QtStateRedirector() {
   switch (player->state()) {
   case QMediaPlayer::StoppedState:
-    eventProcessor(Types::Event::onMediaPlayerStopped);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerStopped);
     break;
   case QMediaPlayer::PlayingState:
-    eventProcessor(Types::Event::onMediaPlayerPlaying);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerPlaying);
     break;
   case QMediaPlayer::PausedState:
-    eventProcessor(Types::Event::onMediaPlayerPaused);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerPaused);
     break;
   }
 }
 void SoundMaker::QtMediaRedirector() {
   switch (player->mediaStatus()) {
   case QMediaPlayer::UnknownMediaStatus:
-    eventProcessor(Types::Event::unknown);
+    eventHeap.eventProcessor(Types::Event::unknown);
     break;
   case QMediaPlayer::NoMedia:
-    eventProcessor(Types::Event::unknown);
+    eventHeap.eventProcessor(Types::Event::unknown);
     break;
   case QMediaPlayer::LoadingMedia:
-    eventProcessor(Types::Event::onMediaPlayerOpening);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerOpening);
     break;
   case QMediaPlayer::LoadedMedia:
-    eventProcessor(Types::Event::onMediaPlayerOpened);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerOpened);
     break;
   case QMediaPlayer::StalledMedia:
-    eventProcessor(Types::Event::onMediaPlayerCorked);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerCorked);
     break;
   case QMediaPlayer::BufferingMedia:
-    eventProcessor(Types::Event::onMediaPlayerBuffering);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerBuffering);
     break;
   case QMediaPlayer::BufferedMedia:
-    eventProcessor(Types::Event::onMediaPlayerBuffered);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerBuffered);
     break;
   case QMediaPlayer::EndOfMedia:
-    eventProcessor(Types::Event::onMediaPlayerMediaFinished);
+    eventHeap.eventProcessor(Types::Event::onMediaPlayerMediaFinished);
     QtStateRedirector();
     onMediaFinished();
     break;
   case QMediaPlayer::InvalidMedia:
-    eventProcessor(Types::Event::unknown);
+    eventHeap.eventProcessor(Types::Event::unknown);
     break;
   default:
     break;
@@ -116,7 +117,9 @@ void SoundMaker::previous() {
 };
 void SoundMaker::next() {
   if (_currentPlaylist.isDynamic) {
-    setTrack(_currentPlaylist.getNextTrack());
+    Track nextTrack =
+        _currentDynamicPlaylist->getNextTrack();
+    setTrack(nextTrack);
   } else {
     if (_currentTrackIndex >= _currentPlaylist.size() - 1) {
       setCurrentIndex(0);
@@ -133,11 +136,11 @@ void SoundMaker::setPosition(float pos) {
 void SoundMaker::setVolume(int vol) { player->setVolume(vol); }
 void SoundMaker::play() {
   player->play();
-  eventProcessor(Types::Event::onMediaPlayerPlaying);
+  eventHeap.eventProcessor(Types::Event::onMediaPlayerPlaying);
 }
 void SoundMaker::pause() {
   player->pause();
-  eventProcessor(Types::Event::onMediaPlayerPaused);
+  eventHeap.eventProcessor(Types::Event::onMediaPlayerPaused);
 }
 void SoundMaker::setTime(float time) {
   this->setPosition(player->duration() / time);
@@ -148,14 +151,27 @@ void SoundMaker::setCurrentIndex(int value) {
   currentTrack = _currentPlaylist.tracks[value];
   setTrack(currentTrack);
 }
-void SoundMaker::setPlaylist(Playlist &playlist, int index) {
+void SoundMaker::setPlaylist(Playlist playlist, int index) {
   _currentPlaylist = playlist;
   // _originalPlaylist = playlist;
   if (getIsShuffled()) {
     setShuffled(true);
   }
-  eventProcessor(Types::Event::SOUNDMAKER_PLAYLIST_SET);
-  setCurrentIndex(index);
+  eventHeap.eventProcessor(Types::Event::SOUNDMAKER_PLAYLIST_SET);
+  if (!_currentPlaylist.isDynamic) {
+    setCurrentIndex(index);
+  } else {
+    next();
+  }
+}
+void SoundMaker::setPlaylist(DynamicPlaylistInterface *playlist){
+  if (_currentDynamicPlaylist){
+    delete _currentDynamicPlaylist;
+  }
+  _currentDynamicPlaylist = playlist;
+  _currentPlaylist = Playlist();
+  _currentPlaylist.isDynamic = true;
+  next();
 }
 void SoundMaker::setPlaylist(Source &playlist) {
   Playlist prepared = client.getPlaylistFromSource(playlist);
@@ -164,19 +180,20 @@ void SoundMaker::setPlaylist(Source &playlist) {
 void SoundMaker::setShuffled(bool value) { _shuffled = value; }
 void SoundMaker::setLoopMode(Types::Loop newLoop) {
   _loopMode = newLoop;
-  eventProcessor(Types::Event::onMediaPlayerLoopModeChanged);
+  eventHeap.eventProcessor(Types::Event::onMediaPlayerLoopModeChanged);
 }
 void SoundMaker::setUrl(string url) {
   player->setMedia(QUrl(QString::fromStdString(url)));
 }
 void SoundMaker::setTrack(Track track) {
+  hasSavedToHistory = false;
   if (track.source.pathType == Types::PathType::URL) {
     player->setMedia(QUrl(QString::fromStdString(track.source.path)));
   } else if (track.source.pathType == Types::PathType::FILESYSTEMPATH) {
     player->setMedia(QUrl::fromLocalFile(
         QString::fromStdString(filesystem::absolute(track.source.path))));
   }
-  eventProcessor(Types::Event::onMediaPlayerMediaChanged);
+  eventHeap.eventProcessor(Types::Event::onMediaPlayerMediaChanged);
 }
 // getters
 int SoundMaker::getVolume() { return player->volume(); }
@@ -231,10 +248,11 @@ void SoundMaker::eventProcessor(const Types::Event &event) {
   if (event == Types::Event::onMediaPlayerPositionChanged) {
     if (!hasSavedToHistory and
         getTime() >= getConfigIntValue("secondsToAddTrackToHistory") * 1000) {
+          
       Library::addTrackToFilePlaylist(
           getTrack(), Library::getPlaylistSource("history.fpl"));
       hasSavedToHistory = true;
     }
   }
-  StandartGlobalCaller::eventProcessor(event);
+  // StandartGlobalCaller::eventProcessor(event);
 }

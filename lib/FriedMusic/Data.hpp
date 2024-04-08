@@ -62,17 +62,17 @@ enum Event {
   onMediaPlayerAudioVolume,
   onMediaPlayerAudioDevice
 };
-enum class ErrorCode{
+enum class ErrorCode {
   AUTHENTICATION_FAILED,
   API_SERVER_CONNECTION_FAILED,
   USERDATA_SERVER_CONNECTION_FAILED,
   STORAGE_SERVER_CONNECTION_FAILED,
 };
 
-};  // namespace Types
+}; // namespace Types
 
 class Source {
- public:
+public:
   std::string path;
   Types::StorageType storageType;
   Types::PathType pathType;
@@ -113,7 +113,7 @@ struct Track {
   std::string album = "";
   std::string artists = "";
   std::string genre = "";
-  std::string filename = "";  // unique global track identifier
+  std::string filename = ""; // unique global track identifier
 
   int albumTrackNumber = -1;
   // usefull when you know playlist that contain
@@ -125,16 +125,25 @@ struct Track {
   bool isAssembled = false;
   Source source;
   Track(){};
-  Track(Source initialSource){
-    source=initialSource;
+  Track(Source initialSource) {
+    source = initialSource;
     filename = std::filesystem::path(source.path).filename();
-    }
+  }
+  vector<string> getSplitArtists() {
+    return explodeMultiplDelimeters(artists, {", ", "; "});
+  }
 };
 
-struct Playlist {
+class Playlist {
+public:
   vector<Track> tracks = {};
   std::string name = "";
   bool isDynamic = false;
   int size() { return distance(tracks.begin(), tracks.end()); }
-  Track getNextTrack(){};
+};
+
+class DynamicPlaylistInterface{
+public:
+  virtual Track getNextTrack()=0;
+  virtual ~DynamicPlaylistInterface() = default;
 };

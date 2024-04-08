@@ -188,10 +188,8 @@ public:
     for (Track track : generatedFromTracksPlaylist.tracks) {
       TrackLine *trackLine = new TrackLine();
       trackLine->setPlaylistHolder(this);
-      trackLine->mainWindow = mainWindow;
       trackLine->setupUi();
       trackLine->setTrack(track, generatedFromTracksPlaylist, index);
-      mainWindow->registerListeners(trackLine);
 
       QListWidgetItem *widgetItem = new QListWidgetItem();
 
@@ -203,10 +201,10 @@ public:
     
     for (Source playlistSource : searchResult.playlists){
       PlaylistLine *playlistLine = new PlaylistLine();
-      playlistLine->mainWindow = mainWindow;
+      
       playlistLine->setupUi();
       playlistLine->setPlaylist(playlistSource);
-      mainWindow->registerListeners(playlistLine);
+      
       QListWidgetItem *widgetItem = new QListWidgetItem();
       searchResultPlaylists->addItem(widgetItem);
       searchResultPlaylists->setItemWidget(widgetItem, playlistLine);

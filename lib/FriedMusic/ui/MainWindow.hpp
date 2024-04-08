@@ -15,8 +15,7 @@
 
 
 class MainWindow : public virtual StandartGlobalUser,
-                   public QWidget,
-                   public StandartGlobalCaller {
+                   public QWidget{
  public:
   Player *playerWidget;
   Finder *finderWidget;
@@ -30,19 +29,6 @@ class MainWindow : public virtual StandartGlobalUser,
     finderWidget = new Finder();
     statusBarWidget = new StatusBar();
     currentTrackListWidget = new TrackList();
-
-    registerListeners(playerWidget);
-    registerListeners(finderWidget);
-    registerListeners(statusBarWidget);
-    registerListeners(currentTrackListWidget);
-
-    playerWidget->mainWindow = this;
-    finderWidget->mainWindow = this;
-    statusBarWidget->mainWindow = this;
-    currentTrackListWidget->mainWindow = this;
-
-    soundmaker.registerCallerListeners(this);
-    client.registerCallerListeners(this);
 
     playerWidget->setupUi();
     finderWidget->setupUi();
@@ -71,12 +57,5 @@ class MainWindow : public virtual StandartGlobalUser,
     layout->addWidget(horizontalSplitter);
   }
   MainWindow() {  }
-  void eventProcessor(const Types::Event &event) override {
-    for (StandartGlobalUser *listener : listeners) {
-      listener->eventProcessor(event);
-    }
-    for (StandartGlobalCaller *callerListener : callerListeners) {
-      callerListener->eventProcessor(event);
-    }
-  }
+
 };

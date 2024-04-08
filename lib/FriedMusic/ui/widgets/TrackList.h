@@ -57,7 +57,6 @@ public:
   void setPlaylist(Playlist &playlist, bool autoAssemble = true) {
     listWidget->clear();
     lines.clear();
-    cout << "cleared" << endl;
     bool isPlaylistValid = (playlist.size()>0);
     if (!isPlaylistValid){
       return;
@@ -71,11 +70,11 @@ public:
     for (Track track : playlist.tracks) {
       TrackLine *trackLine = new TrackLine();
       trackLine->setPlaylistHolder(this);
-      trackLine->mainWindow = mainWindow;
+
       trackLine->setupUi();
       trackLine->setTrack(track, playlist, index);
       
-      mainWindow->registerListeners(trackLine);
+
 
       lines.push_back(trackLine);
       QListWidgetItem *widgetItem = new QListWidgetItem();

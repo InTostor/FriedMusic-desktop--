@@ -56,7 +56,6 @@ public:
     Track madeTrack;
     madeTrack.source = _trackSource;
     madeTrack.filename = filesystem::path(_trackSource.path).filename();
-    cout << madeTrack.filename << endl;
     targetPlaylist.tracks.push_back(madeTrack);
     Library::savePlaylistLocally(targetPlaylist);
     close();

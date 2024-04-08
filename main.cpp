@@ -69,7 +69,6 @@ int main(int argc, char *argv[]) {
   mainWindow->setupUi();
 
   // client.downloadDatabase();
-
   mainWindow->show();
 
   return app.exec();

@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <iostream>
 #include <string>
 
@@ -114,10 +115,8 @@ public:
         continue;
       }
       file << track.filename;
-      cout << track.filename;
       if (i < playlist.size()) {
         file << "\n";
-        cout << endl;
       }
     }
     file.close();
@@ -142,12 +141,10 @@ public:
 
     string sql;
     if (query.rfind("HTTP") == 0) {
-      cout << "find url source: " << query << endl;
       // detect type of url, return smth
     } else if (query.rfind("SQL") == 0) {
       sql = query;
       sql.erase(0, 4);
-      cout << "Execute SQL query: " << sql << endl;
     } else {
       vector<string> tokens = explodeMultiplDelimeters(query, {" ", ";", "; "});
 
@@ -205,7 +202,6 @@ public:
         }
       }
     }
-    cout << out.tracks[0].path << endl;
     return out;
   }
   static inline vector<Source> getLocalPlaylistSources() {
@@ -233,32 +229,107 @@ public:
   }
 };
 
-class MainGeneratorPlaylist : public Playlist {
-  
-  Track getNextTrack() {
-    vector<string> references = {
-      "history",
-      "favourite",
-      "database"
-    };
-    vector<float> referenceWeights = {
-      10.0,
-      20.0,
-      1.0
-    };
-    vector<string> properties = {
-      "self",
-      "album",
-      "artist",
-      "genre",
-    };
-    vector<float> propertyWeights = {
-      2.0,
-      10.0,
-      20.0,
-      10.0
-    };
-    string referenceDecision = randomByWeight(references,referenceWeights);
-  };
+class MainGeneratorPlaylist : public Playlist, public virtual DynamicPlaylistInterface {
+public:
+  std::string name = "dynamic";
+  bool isDynamic = true;
 
+  Track getNextTrack() {
+    Track returnTrack;
+    vector<string> references = {"history", "favourite", "database"};
+    vector<float> referenceWeights = {10.0, 20.0, 1.0};
+    vector<string> properties = {
+        "self",
+        "album",
+        "artist",
+        "genre",
+    };
+    vector<float> propertyWeights = {2.0, 10.0, 20.0, 10.0};
+    // string referenceDecision = randomByWeight(references, referenceWeights);
+    string referenceDecision = "favourite";
+    cout << "ref" << referenceDecision << endl;
+
+    // Switch may look good, but it does not allow of this style variable
+    // declaration
+    Track referenceTrack;
+    if (referenceDecision == "history") {
+      Playlist historyPlaylist = client.getPlaylistFromSource(
+          Library::getPlaylistSource("history.fpl"), false);
+      int random_number = rand() % historyPlaylist.size() - 1;
+      referenceTrack = historyPlaylist.tracks[random_number];
+    }
+    if (referenceDecision == "favourite") {
+      Playlist favouritePlaylist = client.getPlaylistFromSource(
+          Library::getPlaylistSource("favourite.fpl"), false);
+      int random_number = rand() % favouritePlaylist.size() - 1;
+      referenceTrack = favouritePlaylist.tracks[random_number];
+    }
+    referenceTrack = client.assembleTrack(referenceTrack);
+    
+
+    if (referenceDecision == "database") {
+      string sql = "SELECT filename from fullmeta ORDER BY RANDOM() LIMIT 1";
+      SQLite::Database db(getConfigValue("databasePath"),
+                          SQLite::OPEN_READONLY);
+      SQLite::Statement query(db, sql);
+      while (query.executeStep()) {
+        returnTrack.source = client.lookupTrack(query.getColumn(0));
+        returnTrack = client.assembleTrack(returnTrack);
+
+        return returnTrack;
+      }
+    }
+
+    // string propertyDecision = randomByWeight(properties, propertyWeights);
+    string propertyDecision = "genre";
+    cout << "prop" << referenceDecision << endl;
+    if (propertyDecision == "self") {
+      returnTrack = referenceTrack;
+      return referenceTrack;
+    }
+    SQLite::Database db(getConfigValue("databasePath"), SQLite::OPEN_READONLY);
+
+    if (propertyDecision == "album") {
+      string sql = "SELECT filename from fullmeta WHERE album = ? ORDER BY "
+                   "RANDOM() LIMIT 1";
+      SQLite::Statement query(db, sql);
+      query.bind(1, referenceTrack.album);
+      while (query.executeStep()) {
+        returnTrack = client.lookupTrack(query.getColumn(0));
+        break;
+      }
+    } else if (propertyDecision == "artist") {
+      string sql = "SELECT filename from fullmeta WHERE artist in (";
+      string sqlPlaces;
+      vector<string> splitArtists = referenceTrack.getSplitArtists();
+      for (int i = 0; i <= splitArtists.size() - 1; i++) {
+        sqlPlaces += "?";
+        if (i != splitArtists.size() - 1) {
+          sqlPlaces += ",";
+        }
+      }
+      sql += sqlPlaces;
+      sql += ") ORDER BY RANDOM() LIMIT 1";
+      SQLite::Statement query(db, sql);
+      for (int i = 1; i <= splitArtists.size(); i++) {
+        query.bind(i, splitArtists[i - 1]);
+      }
+      while (query.executeStep()) {
+        returnTrack = client.lookupTrack(query.getColumn(0));
+        break;
+      }
+    } else {
+      // (propertyDecision == "genre")
+      string sql = "SELECT filename from fullmeta WHERE genre = ? ORDER BY "
+                   "RANDOM() LIMIT 1";
+      SQLite::Statement query(db, sql);
+      query.bind(1, referenceTrack.genre);
+      while (query.executeStep()) {
+        returnTrack = client.lookupTrack(query.getColumn(0));
+        break;
+      }
+    }
+
+    return returnTrack;
+  };
 };
