@@ -13,7 +13,7 @@
 
 using namespace std;
 
-class SoundMaker : public StandartGlobalUser, public QObject {
+class SoundMaker : public virtual StandartGlobalUser, public QObject {
 private:
   bool _shuffled = false;
   Types::Loop _loopMode = Types::Loop::NONE;

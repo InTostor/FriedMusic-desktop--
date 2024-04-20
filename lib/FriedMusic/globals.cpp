@@ -5,6 +5,9 @@
 #include "StandartGlobalUser.hpp"
 // #include <QThreadPool>
 
-Client client = Client();
-SoundMaker soundmaker;
+
+
 StandartGlobalCaller eventHeap;
+Client client = Client();
+SoundMaker *soundmaker = new SoundMaker();
+

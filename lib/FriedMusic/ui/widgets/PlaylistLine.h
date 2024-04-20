@@ -136,17 +136,17 @@ public:
     nameLabel->setText(QString::fromStdString(_playlistSource.path));
   }
   void onPlayPressed() {
-    if (soundmaker.getCurrentPlaylist().name !=
+    if (soundmaker->getCurrentPlaylist().name !=
         std::filesystem::path(_playlistSource.path).filename()) {
-      soundmaker.setPlaylist(_playlistSource);
-      soundmaker.setCurrentIndex(0);
-      soundmaker.play();
+      soundmaker->setPlaylist(_playlistSource);
+      soundmaker->setCurrentIndex(0);
+      soundmaker->play();
       return;
     }else{
-      if (soundmaker.getIsPlaying()){
-        soundmaker.play();
+      if (soundmaker->getIsPlaying()){
+        soundmaker->play();
       }else{
-        soundmaker.pause();
+        soundmaker->pause();
       }
     }
   }
@@ -160,8 +160,8 @@ public:
     modal->show();
   }
   void onPlaylistChanged() {
-    if (soundmaker.getCurrentPlaylist().name ==
-        std::filesystem::path(_playlistSource.path).filename() and soundmaker.getIsPlaying()) {
+    if (soundmaker->getCurrentPlaylist().name ==
+        std::filesystem::path(_playlistSource.path).filename() and soundmaker->getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
       }else {
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));

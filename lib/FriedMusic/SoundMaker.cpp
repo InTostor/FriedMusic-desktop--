@@ -116,6 +116,9 @@ void SoundMaker::previous() {
   }
 };
 void SoundMaker::next() {
+  if (!&_currentPlaylist){
+    return;
+  }
   if (_currentPlaylist.isDynamic) {
     Track nextTrack =
         _currentDynamicPlaylist->getNextTrack();
@@ -187,6 +190,10 @@ void SoundMaker::setUrl(string url) {
 }
 void SoundMaker::setTrack(Track track) {
   hasSavedToHistory = false;
+  if (!track.isAssembled){
+    track = client.assembleTrack(track);
+  }
+  currentTrack = track;
   if (track.source.pathType == Types::PathType::URL) {
     player->setMedia(QUrl(QString::fromStdString(track.source.path)));
   } else if (track.source.pathType == Types::PathType::FILESYSTEMPATH) {
@@ -247,7 +254,7 @@ void SoundMaker::onMediaFinished() {
 void SoundMaker::eventProcessor(const Types::Event &event) {
   if (event == Types::Event::onMediaPlayerPositionChanged) {
     if (!hasSavedToHistory and
-        getTime() >= getConfigIntValue("secondsToAddTrackToHistory") * 1000) {
+        getTime() >= Config::Config::getConfigIntValue("secondsToAddTrackToHistory") * 1000) {
           
       Library::addTrackToFilePlaylist(
           getTrack(), Library::getPlaylistSource("history.fpl"));

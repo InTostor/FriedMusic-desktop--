@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include "Logging.h"
+
 using namespace std;
 
 class Library {
@@ -26,7 +28,7 @@ public:
   /// @param client pointer to global client object
   /// @return constructed source if found
   static inline Source getPlaylistSource(string filename) {
-    Source favSource(getConfigValue("localUserdataStoragePath") + "/" +
+    Source favSource(Config::getConfigValue("localUserdataStoragePath") + "/" +
                          filename,
                      Types::StorageType::LOCAL, Types::PathType::FILESYSTEMPATH,
                      Types::DataType::PLAYLIST);
@@ -37,7 +39,7 @@ public:
     }
 
     if (client.isAuthenticated()) {
-      favSource = Source(getConfigValue("userdataStorageUrl") +
+      favSource = Source(Config::getConfigValue("userdataStorageUrl") +
                              client.getUsername() + "/" + filename,
                          Types::StorageType::REMOTE, Types::PathType::URL,
                          Types::DataType::PLAYLIST);
@@ -50,14 +52,14 @@ public:
     string path;
     string url;
     if (source.dataType == Types::DataType::TRACK) {
-      path = getConfigValue("localMusicStoragePath") +
+      path = Config::getConfigValue("localMusicStoragePath") +
              string(filesystem::path(source.path).filename());
-      url = getConfigValue("musicStorageUrl") +
+      url = Config::getConfigValue("musicStorageUrl") +
             string(filesystem::path(source.path).filename());
     } else if (source.dataType == Types::DataType::PLAYLIST) {
-      path = getConfigValue("localUserdataStoragePath") +
+      path = Config::getConfigValue("localUserdataStoragePath") +
              string(filesystem::path(source.path).filename());
-      url = getConfigValue("userdataStorageUrl") +
+      url = Config::getConfigValue("userdataStorageUrl") +
             string(filesystem::path(source.path).filename());
     }
     if (std::filesystem::exists(path)) {
@@ -98,24 +100,27 @@ public:
   }
 
   static inline void deleteTrack(string filename) {
-    filesystem::remove(getConfigValue("localMusicStoragePath") + filename);
+    filesystem::remove(Config::getConfigValue("localMusicStoragePath") + filename);
   }
   static inline void deleteTrack(Track track) {
-    filesystem::remove(getConfigValue("localMusicStoragePath") +
+    filesystem::remove(Config::getConfigValue("localMusicStoragePath") +
                        track.filename);
   }
 
   static inline void savePlaylistLocally(Playlist playlist) {
     ofstream file;
-    string path = getConfigValue("localUserdataStoragePath") + playlist.name;
+    string path = Config::getConfigValue("localUserdataStoragePath") + playlist.name;
     file.open(path, ios::out);
     int i = 0;
+    bool written = false;
     for (Track track : playlist.tracks) {
       if (track.filename.length() < 4) {
         continue;
+      }else{
+        written = true;
       }
       file << track.filename;
-      if (i < playlist.size()) {
+      if (i < playlist.size() and written) {
         file << "\n";
       }
     }
@@ -137,7 +142,7 @@ public:
       return out;
     }
 
-    SQLite::Database db(getConfigValue("databasePath"), SQLite::OPEN_READONLY);
+    SQLite::Database db(Config::getConfigValue("databasePath"), SQLite::OPEN_READONLY);
 
     string sql;
     if (query.rfind("HTTP") == 0) {
@@ -192,7 +197,7 @@ public:
       for (string token : tokens) {
 
         for (const auto &entry : filesystem::directory_iterator(
-                 getConfigValue("localUserdataStoragePath"))) {
+                 Config::getConfigValue("localUserdataStoragePath"))) {
           if (string(entry.path()).find(token) != std::string::npos) {
             Source plSource = Source(entry.path(), Types::StorageType::LOCAL,
                                      Types::PathType::FILESYSTEMPATH,
@@ -206,7 +211,7 @@ public:
   }
   static inline vector<Source> getLocalPlaylistSources() {
     string ext(".fpl");
-    string path = getConfigValue("localUserdataStoragePath");
+    string path = Config::getConfigValue("localUserdataStoragePath");
     vector<Source> sources;
     for (auto &p : filesystem::recursive_directory_iterator(path)) {
       if (p.path().extension() == ext) {
@@ -246,8 +251,8 @@ public:
     };
     vector<float> propertyWeights = {2.0, 10.0, 20.0, 10.0};
     // string referenceDecision = randomByWeight(references, referenceWeights);
-    string referenceDecision = "favourite";
-    cout << "ref" << referenceDecision << endl;
+    string referenceDecision = "history";
+    Logger::Debug("Generator playlist reference decision ", referenceDecision);
 
     // Switch may look good, but it does not allow of this style variable
     // declaration
@@ -255,13 +260,13 @@ public:
     if (referenceDecision == "history") {
       Playlist historyPlaylist = client.getPlaylistFromSource(
           Library::getPlaylistSource("history.fpl"), false);
-      int random_number = rand() % historyPlaylist.size() - 1;
+      int random_number = randomInRange(0, historyPlaylist.size()-1);
       referenceTrack = historyPlaylist.tracks[random_number];
     }
     if (referenceDecision == "favourite") {
       Playlist favouritePlaylist = client.getPlaylistFromSource(
           Library::getPlaylistSource("favourite.fpl"), false);
-      int random_number = rand() % favouritePlaylist.size() - 1;
+      int random_number = randomInRange(0, favouritePlaylist.size()-1);
       referenceTrack = favouritePlaylist.tracks[random_number];
     }
     referenceTrack = client.assembleTrack(referenceTrack);
@@ -269,7 +274,7 @@ public:
 
     if (referenceDecision == "database") {
       string sql = "SELECT filename from fullmeta ORDER BY RANDOM() LIMIT 1";
-      SQLite::Database db(getConfigValue("databasePath"),
+      SQLite::Database db(Config::getConfigValue("databasePath"),
                           SQLite::OPEN_READONLY);
       SQLite::Statement query(db, sql);
       while (query.executeStep()) {
@@ -280,14 +285,15 @@ public:
       }
     }
 
-    // string propertyDecision = randomByWeight(properties, propertyWeights);
-    string propertyDecision = "genre";
-    cout << "prop" << referenceDecision << endl;
+    string propertyDecision = randomByWeight(properties, propertyWeights);
+    // string propertyDecision = "genre";
+    Logger::Debug("Generator playlist property decision ", propertyDecision);
+    Logger::Debug("Generator playlist reference track ", referenceTrack.filename);
     if (propertyDecision == "self") {
       returnTrack = referenceTrack;
       return referenceTrack;
     }
-    SQLite::Database db(getConfigValue("databasePath"), SQLite::OPEN_READONLY);
+    SQLite::Database db(Config::getConfigValue("databasePath"), SQLite::OPEN_READONLY);
 
     if (propertyDecision == "album") {
       string sql = "SELECT filename from fullmeta WHERE album = ? ORDER BY "

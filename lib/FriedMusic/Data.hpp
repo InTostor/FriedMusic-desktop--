@@ -62,11 +62,23 @@ enum Event {
   onMediaPlayerAudioVolume,
   onMediaPlayerAudioDevice
 };
+inline Event operator|(Event a, Event b){
+  return static_cast<Event>(static_cast<int>(a) | static_cast<int>(b));
+}
 enum class ErrorCode {
   AUTHENTICATION_FAILED,
   API_SERVER_CONNECTION_FAILED,
   USERDATA_SERVER_CONNECTION_FAILED,
   STORAGE_SERVER_CONNECTION_FAILED,
+};
+
+enum class LoggingLevel{
+  TRACE,
+  DEBUG,
+  INFO,
+  WARN,
+  ERROR,
+  FATAL
 };
 
 }; // namespace Types

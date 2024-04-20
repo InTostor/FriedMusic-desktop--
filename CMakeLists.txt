@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(FriedMusic++ VERSION 0.1.0 LANGUAGES C CXX)
 # SET(CMAKE_CXX_FLAGS "-O3 -Os -mavx2 -mbmi2 -march=native -Ofast -frename-registers -fopenmp")
+SET(CXX_STANDARD 17)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMakeChecksCache)

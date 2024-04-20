@@ -364,15 +364,15 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
 
     QMetaObject::connectSlotsByName(Settings);
     // get current config
-    ApiUrlLineEdit->setText(QString::fromStdString(getConfigValue("apiUrl")));
-    RemoteMusicLineEdit->setText(QString::fromStdString(getConfigValue("musicStorageUrl")));
-    RemoteUserdataLineEdit->setText(QString::fromStdString(getConfigValue("userdataStorageUrl")));
-    DatabasePathLineEdit->setText(QString::fromStdString(getConfigValue("databasePath")));
-    LocalMusicLineEdit->setText(QString::fromStdString(getConfigValue("localMusicStoragePath")));
-    LocalDataLineEdit->setText(QString::fromStdString(getConfigValue("localUserdataStoragePath")));
+    ApiUrlLineEdit->setText(QString::fromStdString(Config::getConfigValue("apiUrl")));
+    RemoteMusicLineEdit->setText(QString::fromStdString(Config::getConfigValue("musicStorageUrl")));
+    RemoteUserdataLineEdit->setText(QString::fromStdString(Config::getConfigValue("userdataStorageUrl")));
+    DatabasePathLineEdit->setText(QString::fromStdString(Config::getConfigValue("databasePath")));
+    LocalMusicLineEdit->setText(QString::fromStdString(Config::getConfigValue("localMusicStoragePath")));
+    LocalDataLineEdit->setText(QString::fromStdString(Config::getConfigValue("localUserdataStoragePath")));
 
-    lineEdit_Login->setText(QString::fromStdString(getConfigValue("username")));
-    lineEdit_Password->setText(QString::fromStdString(getConfigValue("password")));
+    lineEdit_Login->setText(QString::fromStdString(Config::getConfigValue("username")));
+    lineEdit_Password->setText(QString::fromStdString(Config::getConfigValue("password")));
 
     connect(applyPathSettings,&QPushButton::pressed,this,&Settings::onPathsApplyPressed);
     connect(loginButton,&QPushButton::pressed,this,&Settings::onLoginPressed);
@@ -451,19 +451,19 @@ class Settings : public virtual StandartGlobalUser, public QWidget {
     string newLocalMusicStoragePath = LocalMusicLineEdit->text().toStdString();
     string newLocalUserdataStoragePath = LocalDataLineEdit->text().toStdString();
     string newDatabasePath = DatabasePathLineEdit->text().toStdString();
-    setConfigValue("apiUrl", newApiUrl);
-    setConfigValue("musicStorageUrl", newMusicStorageUrl);
-    setConfigValue("userdataStorageUrl", newUserdataStorageUrl);
-    setConfigValue("localMusicStoragePath", newLocalMusicStoragePath);
-    setConfigValue("localUserdataStoragePath", newLocalUserdataStoragePath);
-    setConfigValue("databasePath", newDatabasePath);
+    Config::setConfigValue("apiUrl", newApiUrl);
+    Config::setConfigValue("musicStorageUrl", newMusicStorageUrl);
+    Config::setConfigValue("userdataStorageUrl", newUserdataStorageUrl);
+    Config::setConfigValue("localMusicStoragePath", newLocalMusicStoragePath);
+    Config::setConfigValue("localUserdataStoragePath", newLocalUserdataStoragePath);
+    Config::setConfigValue("databasePath", newDatabasePath);
   }
 //   !WARNING! this is extremely unsafe, violates most of the security policies and maybe geneva convention. Find better way to work with credentials!
   void onLoginPressed(){
     string newUsername = lineEdit_Login->text().toStdString();
     string newPassword = lineEdit_Password->text().toStdString();
-    setConfigValue("username", newUsername);
-    setConfigValue("password", newPassword);
+    Config::setConfigValue("username", newUsername);
+    Config::setConfigValue("password", newPassword);
     client.authenticate();
   }
   void onPushRemotePressed(){}

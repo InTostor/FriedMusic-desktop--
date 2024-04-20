@@ -349,7 +349,7 @@ public:
 
   // Player() {}
   void onMediaPlayerMediaChanged() {
-    Track currentTrack = soundmaker.getTrack();
+    Track currentTrack = soundmaker->getTrack();
     try {
       infoArtist->setText(QString::fromStdString(currentTrack.artists));
       infoAlbum->setText(QString::fromStdString(currentTrack.album));
@@ -361,10 +361,10 @@ public:
   }
   void onMediaPlayerPositionChanged() {
     seekerLabel->setText(
-        QString::fromStdString(secondsToTime(soundmaker.getTime() / 1000.0)));
+        QString::fromStdString(secondsToTime(soundmaker->getTime() / 1000.0)));
     if (!seekerSlider->isSliderDown()) {
       seekerSlider->setValue(
-          (int)(seekerSlider->maximum() * soundmaker.getPosition()));
+          (int)(seekerSlider->maximum() * soundmaker->getPosition()));
     }
   }
   void onMediaPlayerPlaying() {
@@ -374,23 +374,23 @@ public:
     playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
   }
   void onPlayPressed() {
-    if (soundmaker.getIsPlaying()) {
-      soundmaker.pause();
+    if (soundmaker->getIsPlaying()) {
+      soundmaker->pause();
     } else {
-      soundmaker.play();
+      soundmaker->play();
     }
   }
-  void onNextPressed() { soundmaker.next(); }
-  void onPrevPressed() { soundmaker.previous(); }
+  void onNextPressed() { soundmaker->next(); }
+  void onPrevPressed() { soundmaker->previous(); }
   void onSeekerMoved() {
-    soundmaker.setPosition(seekerSlider->value() /
+    soundmaker->setPosition(seekerSlider->value() /
                            (float)seekerSlider->maximum());
   }
   void onDynamicPlaylistPressed() {
-    if (soundmaker.getCurrentPlaylist().name != "dynamic"){
+    if (soundmaker->getCurrentPlaylist().name != "dynamic"){
       MainGeneratorPlaylist *dynamic = new MainGeneratorPlaylist();
-      soundmaker.setPlaylist(dynamic);
-      soundmaker.play();
+      soundmaker->setPlaylist(dynamic);
+      soundmaker->play();
     }
   }
   void onVolumeMoved() {
@@ -399,17 +399,17 @@ public:
     qreal logarithmicVolume = QAudio::convertVolume(
         volumeSlider->value() / qreal(100), QAudio::LinearVolumeScale,
         QAudio::LogarithmicVolumeScale);
-    soundmaker.player->setVolume((int)(logarithmicVolume * 100));
+    soundmaker->player->setVolume((int)(logarithmicVolume * 100));
     */
     // linear
-    soundmaker.player->setVolume(volumeSlider->value());
+    soundmaker->player->setVolume(volumeSlider->value());
 
     string txt = std::to_string(volumeSlider->value()) + "%";
     volumeLabel->setText(QString::fromStdString(txt));
   }
   void onShufflePressed() {}
   void onToFavouritePressed() {
-    Track currentTrack = soundmaker.getTrack();
+    Track currentTrack = soundmaker->getTrack();
     Source favourite = Library::getPlaylistSource("favourite.fpl");
     Playlist favouritePlaylist = client.getPlaylistFromSource(favourite);
     if (client.isTrackInPlaylist(currentTrack, favourite)) {
@@ -423,7 +423,7 @@ public:
     Library::savePlaylistLocally(favouritePlaylist);
   }
   void onDownloadPressed() {
-    Track currentTrack = soundmaker.getTrack();
+    Track currentTrack = soundmaker->getTrack();
     Types::StorageType existence = Library::isSourceExists(currentTrack.source);
     if (existence == Types::StorageType::LOCAL ||
         existence == Types::StorageType::ANY) {
@@ -434,12 +434,12 @@ public:
   }
   void onToPlaylistPressed() {}
   void onLoopComboboxSelected() {
-    soundmaker.setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
+    soundmaker->setLoopMode(loopModesQEnum->value(loopComboBox->currentText()));
   }
   void onFilesUpdated() {
     Source favourite = Library::getPlaylistSource("favourite.fpl");
     Playlist favouritePlaylist = client.getPlaylistFromSource(favourite);
-    Track currentTrack = soundmaker.getTrack();
+    Track currentTrack = soundmaker->getTrack();
     if (client.isTrackInPlaylist(currentTrack, favourite)) {
       addToFavouriteButton->setIcon(
           QIcon(QString::fromStdString(Icons::UNFAVOURITE)));
@@ -473,7 +473,7 @@ public:
       break;
     case Types::Event::onMediaPlayerMediaFinished:
 
-      if (soundmaker.getIsPlaying()) {
+      if (soundmaker->getIsPlaying()) {
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
       } else {
         playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
@@ -481,7 +481,7 @@ public:
       break;
     case Types::Event::onMediaPlayerLoopModeChanged:
       loopComboBox->setCurrentText(
-          loopModesQEnum->key(soundmaker.getLoopMode()));
+          loopModesQEnum->key(soundmaker->getLoopMode()));
       break;
     case Types::Event::FILES_UPDATED:
       onFilesUpdated();

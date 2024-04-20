@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#include "StringMethods.h"
+#include "Config.h"
+
 typedef int64_t msec_t;
 #if defined(__WIN32__)
 
@@ -37,151 +40,10 @@ inline msec_t time_ms(void) {
 
 #define FUNC_NAME(a)         (QString(#a).remove(QRegExp("\\((.*)\\)")).trimmed().toLatin1().constData())
 
-inline std::string ReplaceInString(std::string subject,
-                                   const std::string &search,
-                                   const std::string &replace) {
-  size_t pos = 0;
-  while ((pos = subject.find(search, pos)) != std::string::npos) {
-    subject.replace(pos, search.length(), replace);
-    pos += replace.length();
-  }
-  return subject;
-}
-
-template <typename T>
-inline std::string join(const T &v, const std::string &delim) {
-  std::ostringstream s;
-  for (const auto &i : v) {
-    if (&i != &v[0]) {
-      s << delim;
-    }
-    s << i;
-  }
-  return s.str();
-}
-
-inline std::vector<std::string> explode(const std::string &str,
-                                        const char &ch) {
-  std::string next;
-  std::vector<std::string> result;
-
-  // For each character in the string
-  for (std::string::const_iterator it = str.begin(); it != str.end(); it++) {
-    // If we've hit the terminal character
-    if (*it == ch) {
-      // If we have some characters accumulated
-      if (!next.empty()) {
-        // Add them to the result vector
-        result.push_back(next);
-        next.clear();
-      }
-    } else {
-      // Accumulate the next character into the sequence
-      next += *it;
-    }
-  }
-  if (!next.empty())
-    result.push_back(next);
-  return result;
-}
-
-static inline void
-ParseStringByStringSeparator(std::string s, const std::string separator,
-                             std::vector<std::string> &result) {
-  result.clear();
-  size_t pos = 0;
-  std::string token;
-
-  while ((pos = s.find(separator)) != std::string::npos) {
-    token = s.substr(0, pos);
-    result.push_back(token);
-    s.erase(0, pos + separator.length());
-  }
-  result.push_back(s);
-}
-
-static inline std::vector<std::string>
-explodeMultiplDelimeters(std::string s,
-                         const std::vector<std::string> &separators) {
-  std::vector<std::string> result = {s};
-  for (const auto &sep : separators) {
-    std::vector<std::string> toReplaceBy, tempRes;
-    for (auto &a : result) {
-      ParseStringByStringSeparator(a, sep, tempRes);
-      toReplaceBy.insert(toReplaceBy.end(), tempRes.begin(), tempRes.end());
-    }
-    auto it = toReplaceBy.begin();
-    while (it != toReplaceBy.end()) {
-      if ((*it) == "")
-        it = toReplaceBy.erase(it);
-      else
-        ++it;
-    }
-    result = toReplaceBy;
-  }
-  return result;
-}
-
-static inline std::string getConfigValue(const std::string &key) {
-  std::ifstream file("config.json");
-  if (!file.is_open()) {
-    // harakiri or try to get something
-    return "";
-  } else {
-    nlohmann::json config = nlohmann::json::parse(file);
-    return config[key];
-  }
-}
-
-static inline bool getConfigBoolValue(const std::string &key) {
-  std::ifstream file("config.json");
-  if (!file.is_open()) {
-    // harakiri or try to get something
-    return "";
-  } else {
-    nlohmann::json config = nlohmann::json::parse(file);
-    return config[key];
-  }
-}
+// inline void logLine()
 
 
-static inline int getConfigIntValue(const std::string &key) {
-  std::ifstream file("config.json");
-  if (!file.is_open()) {
-    // harakiri or try to get something
-    return -1;
-  } else {
-    nlohmann::json config = nlohmann::json::parse(file);
-    return config[key];
-  }
-}
 
-inline void setConfigValue(const std::string &key, const std::string &value) {
-  std::ifstream file("config.json");
-  if (!file.is_open()) {
-    return;
-  } else {
-    nlohmann::json config = nlohmann::json::parse(file);
-    config[key] = value;
-    file.close();
-    std::ofstream out("config.json");
-    out << config << std::endl;
-    out.close();
-  }
-}
-inline void setConfigValue(const std::string &key, const int &value) {
-  std::ifstream file("config.json");
-  if (!file.is_open()) {
-    return;
-  } else {
-    nlohmann::json config = nlohmann::json::parse(file);
-    config[key] = value;
-    file.close();
-    std::ofstream out("config.json");
-    out << config << std::endl;
-    out.close();
-  }
-}
 
 inline void downloadFile(std::string url, std::string destination) {
   cpr::Response response = cpr::Get(cpr::Url(url));
@@ -252,6 +114,11 @@ inline T randomByWeight(std::vector<T> values, std::vector<float> weights){
   }
   // if something goes wrong
   return values[0];
+}
+
+inline static int randomInRange(int min, int max){
+int range = max - min + 1;
+return rand() % range + min;
 }
 
 template <typename T>

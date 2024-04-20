@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         QString::fromUtf8("No config file found. \n get config from source or rebuild app."));
     return app.exec();
   }
-  if (!filesystem::exists(getConfigValue("databasePath"))) {
+  if (!filesystem::exists(Config::Config::getConfigValue("databasePath"))) {
     // QErrorMessage *errorMessage = new QErrorMessage();
     switch (QMessageBox::question(
         nullptr, QString::fromUtf8("Bad database"),
@@ -48,11 +48,11 @@ int main(int argc, char *argv[]) {
     }
 
   }
-  if (getConfigBoolValue("authenticateOnStart")) {
-    client.authenticate(getConfigValue("username"), getConfigValue("password"));
+  if (Config::Config::getConfigBoolValue("authenticateOnStart")) {
+    client.authenticate(Config::Config::getConfigValue("username"), Config::Config::getConfigValue("password"));
   }
   // cout <<
-  // filesystem::last_write_time(filesystem::path(getConfigValue("databasePath")))
+  // filesystem::last_write_time(filesystem::path(Config::Config::getConfigValue("databasePath")))
   // << endl;
 
   app.setWindowIcon(QIcon("resource/logo.ico"));
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
   } catch (...) {
   }
   MainWindow *mainWindow = new MainWindow();
-  soundmaker.make();
+  soundmaker->make();
 
   mainWindow->setupUi();
 

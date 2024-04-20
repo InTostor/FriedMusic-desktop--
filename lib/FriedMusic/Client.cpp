@@ -16,11 +16,13 @@
 
 #include "lib/FriedMusic/Client.hpp"
 
+#include "Logging.h"
+
 using namespace std;
 using json = nlohmann::ordered_json;
 
 void Client::authenticate(string username, string password) {
-  string url = getConfigValue("apiUrl") + "/authenticate.php";
+  string url = Config::Config::getConfigValue("apiUrl") + "/authenticate.php";
   cpr::Response response =
       cpr::Get(cpr::Url(url),
                cpr::Authentication(username, password, cpr::AuthMode::BASIC),
@@ -42,23 +44,23 @@ void Client::authenticate(string username, string password) {
   eventProcessor(Types::Event::AUTHENTICATION_TRYED);
 }
 void Client::authenticate(){
-  string username = getConfigValue("username");
-  string password = getConfigValue("password");
+  string username = Config::Config::getConfigValue("username");
+  string password = Config::Config::getConfigValue("password");
   Client::authenticate(username,password);
 }
 string Client::getUsername() { return _username; };
 bool Client::isServerAccessible() {
-  cpr::Response response = cpr::Head(cpr::Url(getConfigValue("apiUrl")));
+  cpr::Response response = cpr::Head(cpr::Url(Config::getConfigValue("apiUrl")));
   return response.status_code == 200;
 }
 bool Client::isAuthenticated() { return _authenticated; };
 void Client::downloadDatabase() {
-  string url = getConfigValue("apiUrl") + "/selectMetadata.php?sql";
+  string url = Config::Config::getConfigValue("apiUrl") + "/selectMetadata.php?sql";
   cpr::Response dataResponse = cpr::Get(cpr::Url(url), cookies);
 
   if (dataResponse.status_code == 200) {
     url =
-        getConfigValue("apiUrl") + "/getDatabaseCreateStatement.php?typesonly";
+        Config::Config::getConfigValue("apiUrl") + "/getDatabaseCreateStatement.php?typesonly";
     // if API available, there is no sense to check it twice
 
     json values = json::parse(cpr::Get(cpr::Url(url), cookies).text);
@@ -75,7 +77,7 @@ void Client::downloadDatabase() {
 
     json data = json::parse(dataResponse.text);
 
-    SQLite::Database db(getConfigValue("databasePath"),
+    SQLite::Database db(Config::Config::getConfigValue("databasePath"),
                         SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
     db.exec("DROP TABLE IF EXISTS fullmeta"); // purge all data, because
@@ -123,13 +125,13 @@ void Client::downloadDatabase() {
 }
 void Client::pullRemote() {
   cpr::Response response = cpr::Get(
-      cpr::Url(getConfigValue("apiUrl") + "/getMyPlaylists.php"), cookies);
+      cpr::Url(Config::Config::getConfigValue("apiUrl") + "/getMyPlaylists.php"), cookies);
   string filesList;
   if (response.status_code == 200) {
     filesList += response.text;
   }
   response = cpr::Get(
-      cpr::Url(getConfigValue("apiUrl") + "/getMyBlocklists.php"), cookies);
+      cpr::Url(Config::Config::getConfigValue("apiUrl") + "/getMyBlocklists.php"), cookies);
   if (response.status_code == 200) {
     filesList += "\n";
     filesList += response.text;
@@ -140,16 +142,16 @@ void Client::pullRemote() {
   string username = getUsername();
   while (std::getline(lineStream, filename, '\n')) {
     if ((filename != "") and (filename != "\n")) {
-      cout << "Downloading " << filename << endl;
+      Logger::Info("Downloading",filename);
       if (!filesystem::is_directory(
-              getConfigValue("localUserdataStoragePath")) ||
-          !filesystem::exists(getConfigValue("localUserdataStoragePath"))) {
+              Config::Config::getConfigValue("localUserdataStoragePath")) ||
+          !filesystem::exists(Config::Config::getConfigValue("localUserdataStoragePath"))) {
         filesystem::create_directory(
-            getConfigValue("localUserdataStoragePath"));
+            Config::Config::getConfigValue("localUserdataStoragePath"));
       }
-      downloadFileAsync(getConfigValue("userdataStorageUrl") + "/" + username +
+      downloadFileAsync(Config::Config::getConfigValue("userdataStorageUrl") + "/" + username +
                             "/" + filename,
-                        getConfigValue("localUserdataStoragePath") + "/" +
+                        Config::Config::getConfigValue("localUserdataStoragePath") + "/" +
                             filename);
     }
   }
@@ -157,15 +159,15 @@ void Client::pullRemote() {
 void Client::pushRemote() {
   for (filesystem::directory_entry const &dir_entry :
        filesystem::directory_iterator(
-           getConfigValue("localUserdataStoragePath"))) {
+           Config::getConfigValue("localUserdataStoragePath"))) {
     if (dir_entry.path() == "." || dir_entry.path() == ".." ||
         dir_entry.path() == "") {
       continue;
     }
 
-    cout << "Uploading " << dir_entry << endl;
+    Logger::Debug("Uploading to remote: ", dir_entry);
     cpr::Response response =
-        cpr::Post(cpr::Url(getConfigValue("apiUrl") + "/uploadFile.php"),
+        cpr::Post(cpr::Url(Config::getConfigValue("apiUrl") + "/uploadFile.php"),
                   cpr::Multipart{{"file", cpr::File(dir_entry.path())}});
   }
 };
@@ -175,20 +177,20 @@ void Client::downloadTrack(vector<string> filenames) {
   }
 };
 void Client::downloadTrack(string filename) {
-  string url = getConfigValue("musicStorageUrl") + filename;
+  string url = Config::getConfigValue("musicStorageUrl") + filename;
   url = ReplaceInString(url, " ", "%20");
-  string dest = getConfigValue("localMusicStoragePath") + "/" + filename;
+  string dest = Config::getConfigValue("localMusicStoragePath") + "/" + filename;
   downloadFileAsync(url, dest);
   eventProcessor(Types::Event::FILES_UPDATED);
 };
 void Client::deleteTrack(string filename) {
-  filesystem::remove(getConfigValue("localMusicStoragePath") + filename);
+  filesystem::remove(Config::getConfigValue("localMusicStoragePath") + filename);
 }
 Client::Client(){};
 // vector<string> Client::getTracksList(Types::StorageType where){};
 vector<string> Client::getPlaylistFiles(Types::StorageType where) {
   vector<string> temp;
-  for (const auto &entry : filesystem::directory_iterator(getConfigValue(""))) {
+  for (const auto &entry : filesystem::directory_iterator(Config::getConfigValue(""))) {
     if (entry.path() == "." || entry.path() == ".." ||
         !(filesystem::path(entry.path()).extension() == ".fpl")) {
       continue;
@@ -199,7 +201,7 @@ vector<string> Client::getPlaylistFiles(Types::StorageType where) {
 };
 // vector<Source> Client::getPlaylistsSource(Types::StorageType where){};
 Source Client::lookupTrack(string filename) {
-  string localPath = getConfigValue("localMusicStoragePath") + filename;
+  string localPath = Config::getConfigValue("localMusicStoragePath") + filename;
 
   if (filesystem::exists(localPath)) {
     Source source(localPath, Types::StorageType::LOCAL,
@@ -219,7 +221,7 @@ Source Client::lookupTrack(string filename) {
   }
   Source source;
   */
-  string remoteUrl = getConfigValue("musicStorageUrl") + filename;
+  string remoteUrl = Config::getConfigValue("musicStorageUrl") + filename;
   Source source(remoteUrl, Types::StorageType::REMOTE, Types::PathType::URL,
                   Types::DataType::TRACK);
   return source;
@@ -234,8 +236,8 @@ vector<Source> Client::lookupTrack(vector<string> filenames) {
 
 // mutates track
 Track Client::assembleTrack(Track track) {
-  // cout << track->filename << endl;
-  SQLite::Database db(getConfigValue("databasePath"));
+  // Logger::Debug("Assembling ",track->filename);
+  SQLite::Database db(Config::getConfigValue("databasePath"));
   SQLite::Statement query(
       db, "SELECT title, album, tracknumber, genre, year, duration, artist "
           "FROM fullmeta WHERE filename = ?");
@@ -295,7 +297,7 @@ vector<Track> Client::assembleTracks(vector<Track> tracks) {
   }
   sql += join(zeros, ",");
   sql += ")";
-  SQLite::Database db(getConfigValue("databasePath"));
+  SQLite::Database db(Config::getConfigValue("databasePath"));
 
   SQLite::Statement query(db, sql);
 
@@ -357,7 +359,7 @@ Playlist Client::getPlaylistFromSource(Source source, bool assemble) {
     if (!isServerAccessible()) {
       return Playlist();
     }
-    searchList.push_back(getConfigValue("userdataStorageUrl") + getUsername() +
+    searchList.push_back(Config::getConfigValue("userdataStorageUrl") + getUsername() +
                          "/" + source.path);
     cpr::Response response;
     for (string url : searchList) {
@@ -449,7 +451,7 @@ bool Client::isTrackInPlaylist(Track track, Source source) {
 
 bool Client::isTrackDownloaded(Track track) {
   return std::filesystem::exists(
-      getConfigValue("localMusicStoragePath") +
+      Config::getConfigValue("localMusicStoragePath") +
       string(filesystem::path(track.filename).filename()));
 }
 bool Client::isSourceExistsLocally(Source source) {

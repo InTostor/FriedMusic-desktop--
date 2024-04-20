@@ -6,6 +6,7 @@
 #include "StandartGlobalUser.hpp"
 #include "globals.h"
 #include <future>
+#include "Logging.h"
 
 using namespace std;
 
@@ -20,12 +21,11 @@ StandartGlobalUser::~StandartGlobalUser() {
 /// @brief Calls methods on stored listeners. Callbacks
 
 void StandartGlobalCaller::registerListeners(StandartGlobalUser *object) {
-
   if (find(listeners.begin(), listeners.end(), object) == listeners.end()) {
     listeners.push_back(object);
-    cout << "registered listener: " << object  << endl;
+    Logger::Info("Registered listener: ",object);
   } else {
-    cout << "Cannot register listener: " << object << endl;
+    Logger::Error("Cannot register listener: ",object);
   }
 };
 
@@ -38,16 +38,18 @@ void StandartGlobalCaller::unregisterListener(StandartGlobalUser *object) {
   vector<StandartGlobalUser *>::iterator toErase;
   toErase = find(listeners.begin(), listeners.end(), object);
   listeners.erase(toErase);
+  Logger::Info("Unregistered listener: ",object);
 }
 
 void StandartGlobalCaller::eventProcessor(const Types::Event &event,
                                           bool async) {
+                                          
   for (StandartGlobalUser *listener : listeners) {
     // !HEISENBUG! sometimes there is a phantom address, which is not in the
     // !listeners array. This will cause SIGSEGV
     if (listener and
         find(listeners.begin(), listeners.end(), listener) != listeners.end()) {
-      cout << "Calling event " << event << " on the: " << listener << endl;
+      // cout << "Calling event " << event << " on the: " << listener << endl;
       if (async) {
         std::async(std::launch::async, &StandartGlobalUser::eventProcessor,
                    listener, event);
@@ -58,7 +60,7 @@ void StandartGlobalCaller::eventProcessor(const Types::Event &event,
         listener->eventProcessor(event);
       }
     }else{
-      cout << "Tryed to call event " << event << " on not bad listener: " << listener<<endl;
+      Logger::Error("Tryed to call event " , event , " on not bad listener: " , listener);
     }
   }
 }

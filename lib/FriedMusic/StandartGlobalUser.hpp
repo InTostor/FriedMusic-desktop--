@@ -11,6 +11,9 @@
 
 using namespace std;
 
+struct GlobalListenerSubscription{
+  
+};
 
 class StandartGlobalUser {
 public:
@@ -23,7 +26,7 @@ public:
 /// @brief Calls methods on stored listeners. Callbacks
 class StandartGlobalCaller {
 protected:
-  vector<StandartGlobalUser *> listeners;
+  vector<StandartGlobalUser *> listeners = {};
 
 public:
   void registerListeners(StandartGlobalUser *object);

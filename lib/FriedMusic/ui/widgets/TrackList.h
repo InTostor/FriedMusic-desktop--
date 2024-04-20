@@ -30,6 +30,7 @@
 #include "globals.h"
 
 
+// Currently this class is only for track list under the player widget
 class TrackList : public virtual StandartGlobalUser, public QWidget, public virtual PlaylistHolder {
 public:
   QVBoxLayout *verticalLayout;
@@ -88,14 +89,14 @@ public:
     // this->setMinimumWidth(listWidget->sizeHintForColumn(0));
   };
   void onSoundMakerPlaylistInsert() {
-    Playlist currentPlaylist = soundmaker.getCurrentPlaylist();
+    Playlist currentPlaylist = soundmaker->getCurrentPlaylist();
     setPlaylist(currentPlaylist);
   }
   void onFilesUpdated() {
     Source favSource("./userdata/favourite.fpl", Types::StorageType::LOCAL,
                      Types::PathType::FILESYSTEMPATH,
                      Types::DataType::PLAYLIST);
-    Playlist currentPlaylist = soundmaker.getCurrentPlaylist();
+    Playlist currentPlaylist = soundmaker->getCurrentPlaylist();
     for (int i = 0; i < lines.size(); i++) {
       // update each
       bool isInFavourite =
@@ -118,7 +119,7 @@ public:
     }
   }
   Playlist getHoldedPlaylist(){
-    return soundmaker.getCurrentPlaylist();
+    return soundmaker->getCurrentPlaylist();
   }
 };
 #endif

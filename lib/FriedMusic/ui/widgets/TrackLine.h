@@ -220,8 +220,8 @@ public:
     durationLabel->setText(
         QString::fromStdString(secondsToTime(track.duration)));
 
-    if (soundmaker.getTrack().filename == track.filename and
-        soundmaker.getIsPlaying()) {
+    if (soundmaker->getTrack().filename == track.filename and
+        soundmaker->getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));
@@ -232,21 +232,21 @@ public:
     if (holder) {
       Playlist parentPlaylist = holder->getHoldedPlaylist();
       Track track = parentPlaylist.tracks[indexInPlaylist];
-      if (soundmaker.getCurrentPlaylist().name != parentPlaylist.name) {
-        soundmaker.setPlaylist(parentPlaylist, indexInPlaylist);
-        soundmaker.play();
+      if (soundmaker->getCurrentPlaylist().name != parentPlaylist.name) {
+        soundmaker->setPlaylist(parentPlaylist, indexInPlaylist);
+        soundmaker->play();
         return;
       }
-      if (soundmaker.getTrack().filename == track.filename) {
-        if (soundmaker.getIsPlaying()) {
-          soundmaker.pause();
+      if (soundmaker->getTrack().filename == track.filename) {
+        if (soundmaker->getIsPlaying()) {
+          soundmaker->pause();
         } else {
-          soundmaker.play();
+          soundmaker->play();
         }
 
       } else {
-        soundmaker.setCurrentIndex(indexInPlaylist);
-        soundmaker.play();
+        soundmaker->setCurrentIndex(indexInPlaylist);
+        soundmaker->play();
       }
     }
   }
@@ -278,8 +278,8 @@ public:
       return;
     }
     Track track = parentPlaylist.tracks[indexInPlaylist];
-    if (soundmaker.getTrack().filename == track.filename and
-        soundmaker.getIsPlaying()) {
+    if (soundmaker->getTrack().filename == track.filename and
+        soundmaker->getIsPlaying()) {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PAUSE)));
     } else {
       playButton->setIcon(QIcon(QString::fromStdString(Icons::PLAY)));

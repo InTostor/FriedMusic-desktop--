@@ -17,7 +17,7 @@ class Database {
   nlohmann::json Database::executeRemoteQuery(string sql) {
     sql = ReplaceInString(sql, "&", "%26");
     string url;
-    url = getConfigValue("apiUrl") + "/selectMetadata.php";
+    url = Config::getConfigValue("apiUrl") + "/selectMetadata.php";
     cpr::Response response =
         cpr::Post(cpr::Url{url}, cpr::Payload{{"sql", sql}});
     if (response.status_code == 200) {
